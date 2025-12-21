@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Mise en Place — FlyLady for HDB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sage-50: #f6f7f4;
+      --sage-100: #e8ebe3;
+      --sage-200: #d4dbc9;
+      --sage-300: #b5c4a3;
+      --sage-400: #8fa876;
+      --sage-500: #6b8a54;
+      --sage-600: #557043;
+      --sage-700: #445837;
+      --sage-800: #38472e;
+      --sage-900: #2f3b28;
+      --cream: #fdfcf9;
+      --warm-gray: #847e77;
+      --charcoal: #3a3632;
+      --success: #7dad5e;
+      --skip: #c9a87c;
+      --energy-low: #e8d5b7;
+      --energy-med: #d4dbc9;
+      --energy-high: #b5c4a3;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'DM Sans', -apple-system, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --shadow-soft: 0 2px 12px rgba(107, 138, 84, 0.08);
+      --shadow-lifted: 0 8px 30px rgba(107, 138, 84, 0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--sage-50);
+      color: var(--charcoal);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .icon {
+      width: 24px; height: 24px;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
+    }
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--cream);
+      position: relative;
+    }
+    .header {
+      padding: 24px 24px 20px;
+      background: linear-gradient(to bottom, var(--sage-100) 0%, var(--cream) 100%);
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .logo {
+      font-family: var(--font-serif);
+      font-size: 1.75rem;
+      font-weight: 500;
+      color: var(--sage-700);
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--sage-400); font-style: italic; }
+    .header-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--cream);
+      color: var(--sage-600);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.2s ease;
+    }
+    .icon-btn:hover { transform: scale(1.05); box-shadow: var(--shadow-lifted); }
+    .icon-btn.active { background: var(--sage-500); color: white; }
+    .energy-selector {
+      display: flex; gap: 8px; margin-bottom: 16px;
+      align-items: center;
+    }
+    .energy-buttons {
+      flex: 1; display: flex; gap: 8px;
+      padding: 4px; background: white;
+      border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
+      transition: all 0.3s ease;
+    }
+    .energy-buttons.hidden {
+      opacity: 0; max-height: 0; overflow: hidden;
+      padding: 0; margin: -16px 0 0 0;
+    }
+    .energy-btn {
+      flex: 1; padding: 10px 8px; border: none;
+      border-radius: var(--radius-sm); background: transparent;
+      font-family: var(--font-sans); font-size: 0.75rem;
+      color: var(--warm-gray); cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+    }
+    .energy-btn span { font-size: 1.25rem; }
+    .energy-btn.active { background: var(--sage-100); color: var(--sage-700); }
+    .energy-btn[data-energy="1"].active { background: var(--energy-low); }
+    .energy-btn[data-energy="2"].active { background: var(--energy-med); }
+    .energy-btn[data-energy="3"].active { background: var(--energy-high); }
+    .zone-indicator {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-soft);
+    }
+    .zone-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--warm-gray);
+      margin-bottom: 4px;
+    }
+    .zone-name {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--sage-700);
+      margin-bottom: 12px;
+    }
+    .zone-progress { display: flex; align-items: center; gap: 12px; }
+    .progress-bar {
+      flex: 1; height: 6px;
+      background: var(--sage-100);
+      border-radius: 3px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--sage-400), var(--sage-500));
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .progress-text {
+      font-size: 0.875rem;
+      color: var(--sage-600);
+      font-weight: 500;
+      min-width: 40px;
+      text-align: right;
+    }
+    .timer-float {
+      position: sticky; top: 12px; z-index: 100;
+      padding: 0 24px;
+      margin-bottom: 16px;
+    }
+    .timer-container {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--sage-300);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+    }
+    .timer-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+    .timer-ring svg { transform: rotate(-90deg); width: 80px; height: 80px; }
+    .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.5); stroke-width: 4; }
+    .timer-ring-progress {
+      fill: none; stroke: var(--sage-700); stroke-width: 4;
+      stroke-linecap: round; transition: stroke-dashoffset 0.5s ease;
+    }
+    .timer-display {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-sans);
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--sage-800);
+    }
+    .timer-info { flex: 1; }
+    .timer-label {
+      font-size: 0.7rem; color: var(--sage-700);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .timer-status {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      color: var(--sage-800);
+      font-weight: 600;
+    }
+    .timer-controls { display: flex; gap: 8px; }
+    .timer-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .timer-btn-primary { background: var(--sage-700); color: white; }
+    .timer-btn-primary:hover { background: var(--sage-800); transform: scale(1.05); }
+    .timer-btn-secondary { background: rgba(255,255,255,0.7); color: var(--sage-700); }
+    .timer-btn-secondary:hover { background: white; }
+    .main-content { padding: 0 24px 120px; }
+    .section-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin: 24px 0 12px;
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem; font-weight: 600;
+      color: var(--sage-800);
+    }
+    .section-actions { display: flex; align-items: center; gap: 8px; }
+    .section-count {
+      font-size: 0.75rem; color: var(--warm-gray);
+      background: var(--sage-100);
+      padding: 4px 10px; border-radius: 12px;
+    }
+    .edit-section-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: none; background: transparent;
+      color: var(--warm-gray); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .edit-section-btn:hover { background: var(--sage-100); color: var(--sage-600); }
+    .task-list { display: flex; flex-direction: column; gap: 8px; }
+    .task-item {
+      background: white; border-radius: var(--radius-md);
+      padding: 16px; display: flex; align-items: center;
+      gap: 14px; box-shadow: var(--shadow-soft);
+      transition: all 0.2s ease; cursor: pointer;
+    }
+    .task-item:hover { box-shadow: var(--shadow-lifted); transform: translateY(-1px); }
+    .task-item.completed { opacity: 0.6; background: var(--sage-50); }
+    .task-item.completed .task-text { text-decoration: line-through; color: var(--warm-gray); }
+    .task-item.hidden { display: none; }
+    .task-checkbox {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid var(--sage-300);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.2s ease;
+    }
+    .task-item.completed .task-checkbox {
+      background: var(--sage-400);
+      border-color: var(--sage-400);
+      color: white;
+    }
+    .task-checkbox .icon {
+      width: 14px; height: 14px; opacity: 0;
+      transform: scale(0.5); transition: all 0.2s ease;
+    }
+    .task-item.completed .task-checkbox .icon { opacity: 1; transform: scale(1); }
+    .task-content { flex: 1; min-width: 0; }
+    .task-text { font-size: 0.9375rem; color: var(--charcoal); line-height: 1.4; }
+    .task-meta {
+      font-size: 0.7rem; color: var(--warm-gray);
+      margin-top: 2px; display: flex;
+      align-items: center; gap: 6px;
+    }
+    .task-equipment {
+      display: flex; gap: 4px; flex-shrink: 0;
+      margin-left: auto; padding-left: 8px;
+    }
+    .task-equipment-icon {
+      width: 22px; height: 22px;
+      color: var(--sage-400);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .task-equipment-icon svg {
+      width: 18px; height: 18px;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
+    }
+    .effort-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .effort-dot.low { background: var(--energy-low); }
+    .effort-dot.med { background: var(--energy-med); }
+    .effort-dot.high { background: var(--energy-high); }
+    .streak-banner {
+      background: linear-gradient(135deg, var(--sage-200) 0%, var(--sage-100) 100%);
+      border-radius: var(--radius-md); padding: 16px;
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 24px;
+    }
+    .streak-icon { font-size: 1.5rem; }
+    .streak-content { flex: 1; }
+    .streak-label {
+      font-size: 0.75rem; color: var(--sage-700);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .streak-value {
+      font-family: var(--font-serif);
+      font-size: 1.25rem; font-weight: 600;
+      color: var(--sage-800);
+    }
+    .affirmation {
+      text-align: center; padding: 32px 24px;
+      color: var(--sage-600); font-style: italic;
+      font-family: var(--font-serif); font-size: 1.125rem;
+    }
+    /* Focus Mode */
+    .focus-overlay {
+      position: fixed; inset: 0; background: var(--cream);
+      z-index: 200; display: flex; flex-direction: column;
+      opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    }
+    .focus-overlay.active { opacity: 1; visibility: visible; }
+    .focus-header {
+      padding: 24px; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .focus-close {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: none; background: var(--sage-100);
+      color: var(--sage-600); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .focus-content {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px; text-align: center;
+    }
+    .focus-timer {
+      position: relative; width: 200px; height: 200px;
+      margin: 0 auto 48px;
+    }
+    .focus-timer svg { transform: rotate(-90deg); width: 200px; height: 200px; }
+    .focus-timer-bg { fill: none; stroke: var(--sage-100); stroke-width: 8; }
+    .focus-timer-progress {
+      fill: none; stroke: var(--sage-400); stroke-width: 8;
+      stroke-linecap: round; transition: stroke-dashoffset 0.5s ease;
+    }
+    .focus-timer-display {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-serif);
+      font-size: 3rem; font-weight: 600;
+      color: var(--sage-700);
+    }
+    .focus-task-label {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--warm-gray);
+      margin-bottom: 8px;
+    }
+    .focus-task-text {
+      font-family: var(--font-serif);
+      font-size: 1.5rem; color: var(--sage-800);
+      margin-bottom: 32px; max-width: 300px;
+    }
+    .focus-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .focus-btn {
+      padding: 14px 28px; border-radius: var(--radius-md);
+      border: none; font-family: var(--font-sans);
+      font-size: 1rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .focus-btn-primary { background: var(--sage-500); color: white; }
+    .focus-btn-primary:hover { background: var(--sage-600); }
+    .focus-btn-secondary { background: var(--sage-100); color: var(--sage-700); }
+    .focus-btn-skip { background: transparent; color: var(--warm-gray); border: 1px solid var(--sage-200); }
+    .focus-complete-msg { display: none; }
+    .focus-complete-msg.show { display: block; }
+    .focus-complete-msg h2 {
+      font-family: var(--font-serif);
+      font-size: 2rem; color: var(--sage-700);
+      margin-bottom: 12px;
+    }
+    .focus-complete-msg p { color: var(--warm-gray); margin-bottom: 24px; }
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(56, 71, 46, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; z-index: 1000;
+      opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal {
+      background: var(--cream); border-radius: var(--radius-lg);
+      width: 100%; max-width: 400px; max-height: 85vh;
+      overflow-y: auto; transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+    .modal-header {
+      padding: 24px 24px 0; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 1.5rem; font-weight: 600;
+      color: var(--sage-800);
+    }
+    .modal-close {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: none; background: var(--sage-100);
+      color: var(--sage-600); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-body { padding: 24px; }
+    .settings-group { margin-bottom: 24px; }
+    .settings-label {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--warm-gray);
+      margin-bottom: 8px; display: block;
+    }
+    .settings-input {
+      width: 100%; padding: 12px 16px;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans); font-size: 1rem;
+      color: var(--charcoal); background: white;
+      transition: border-color 0.2s ease;
+    }
+    .settings-input:focus { outline: none; border-color: var(--sage-400); }
+    .timer-presets { display: flex; gap: 8px; }
+    .timer-preset {
+      flex: 1; padding: 10px;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm); background: white;
+      font-family: var(--font-sans); font-size: 0.875rem;
+      color: var(--sage-700); cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .timer-preset.active {
+      background: var(--sage-500);
+      border-color: var(--sage-500);
+      color: white;
+    }
+    .timer-preset:hover:not(.active) { border-color: var(--sage-400); }
+    .zone-list { display: flex; flex-direction: column; gap: 8px; }
+    .zone-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; background: white;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--sage-200);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .zone-item:hover { border-color: var(--sage-300); }
+    .zone-item.current { border-color: var(--sage-400); background: var(--sage-50); }
+    .zone-item.dragging { opacity: 0.5; transform: scale(1.02); }
+    .zone-item-drag {
+      color: var(--sage-300); cursor: grab;
+      padding: 4px; margin: -4px;
+    }
+    .zone-item-drag:active { cursor: grabbing; }
+    .zone-number {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--sage-200);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 500; color: var(--sage-700);
+    }
+    .zone-item.current .zone-number { background: var(--sage-500); color: white; }
+    .zone-item-name { flex: 1; font-size: 0.9375rem; }
+    .zone-item-badge {
+      font-size: 0.625rem; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--sage-500);
+      background: var(--sage-100);
+      padding: 3px 8px; border-radius: 10px;
+    }
+    .review-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .review-stat { background: white; padding: 16px; border-radius: var(--radius-md); text-align: center; }
+    .review-stat-value {
+      font-family: var(--font-serif);
+      font-size: 2rem; font-weight: 600;
+      color: var(--sage-700);
+    }
+    .review-stat-label {
+      font-size: 0.75rem; color: var(--warm-gray);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .review-stat.success .review-stat-value { color: var(--success); }
+    .review-tasks { margin-bottom: 24px; }
+    .review-tasks-title {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--warm-gray);
+      margin-bottom: 8px;
+    }
+    .review-task {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid var(--sage-100);
+      font-size: 0.875rem;
+    }
+    .review-task:last-child { border-bottom: none; }
+    .review-task-icon { width: 18px; height: 18px; }
+    .review-task-icon.done { color: var(--success); }
+    .review-task-icon.skipped { color: var(--skip); }
+    /* Calendar */
+    .calendar { background: white; border-radius: var(--radius-md); padding: 16px; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .calendar-title { font-family: var(--font-serif); font-size: 1.125rem; color: var(--sage-700); }
+    .calendar-nav { display: flex; gap: 8px; }
+    .calendar-nav-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: none; background: var(--sage-100);
+      color: var(--sage-600); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; }
+    .calendar-weekday {
+      text-align: center; font-size: 0.625rem;
+      text-transform: uppercase; color: var(--warm-gray);
+      padding: 4px;
+    }
+    .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-size: 0.875rem;
+      color: var(--charcoal); cursor: pointer;
+      transition: all 0.2s ease; position: relative;
+    }
+    .calendar-day:hover { background: var(--sage-100); }
+    .calendar-day.other-month { color: var(--sage-200); }
+    .calendar-day.today { font-weight: 600; color: var(--sage-700); }
+    .calendar-day.has-activity::after {
+      content: ''; position: absolute; bottom: 2px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--sage-400);
+    }
+    .calendar-day.selected { background: var(--sage-500); color: white; }
+    .calendar-day.selected::after { background: white; }
+    .day-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--sage-100); }
+    .day-detail-title {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--warm-gray);
+      margin-bottom: 8px;
+    }
+    .day-detail-empty { color: var(--warm-gray); font-size: 0.875rem; font-style: italic; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 14px 24px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans); font-size: 1rem;
+      font-weight: 500; cursor: pointer;
+      transition: all 0.2s ease; border: none; width: 100%;
+    }
+    .btn-primary { background: var(--sage-500); color: white; }
+    .btn-primary:hover { background: var(--sage-600); }
+    .btn-secondary { background: var(--sage-100); color: var(--sage-700); }
+    .btn-secondary:hover { background: var(--sage-200); }
+    .toast {
+      position: fixed; bottom: 100px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--sage-800); color: white;
+      padding: 14px 24px; border-radius: var(--radius-md);
+      font-size: 0.9375rem; opacity: 0; visibility: hidden;
+      transition: all 0.3s ease; z-index: 1001;
+      text-align: center; max-width: 90%;
+    }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: white;
+      border-top: 1px solid var(--sage-100);
+      padding: 12px 24px 28px;
+      display: flex; justify-content: space-around;
+      z-index: 50;
+    }
+    .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+      color: var(--warm-gray); font-size: 0.625rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      cursor: pointer; background: none; border: none;
+      transition: color 0.2s ease;
+    }
+    .nav-item.active { color: var(--sage-600); }
+    .nav-item:hover { color: var(--sage-500); }
+    .edit-task-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px; background: white;
+      border-radius: var(--radius-sm); margin-bottom: 6px;
+    }
+    .edit-task-input {
+      flex: 1; border: none;
+      font-family: var(--font-sans); font-size: 0.9375rem;
+      color: var(--charcoal); background: transparent;
+    }
+    .edit-task-input:focus { outline: none; }
+    .effort-select {
+      padding: 4px 8px;
+      border: 1px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans); font-size: 0.75rem;
+      color: var(--sage-700); background: white;
+    }
+    .delete-task-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: none; background: transparent;
+      color: var(--warm-gray); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .delete-task-btn:hover { background: #fee; color: #c00; }
+    .add-task-btn {
+      width: 100%; padding: 12px;
+      border: 2px dashed var(--sage-200);
+      border-radius: var(--radius-sm); background: transparent;
+      color: var(--sage-500);
+      font-family: var(--font-sans); font-size: 0.875rem;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      gap: 8px; margin-top: 8px;
+    }
+    .add-task-btn:hover { border-color: var(--sage-400); background: var(--sage-50); }
+    
+    .equipment-selector {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--sage-100);
+    }
+    .equipment-toggle {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      background: white;
+      color: var(--sage-400);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .equipment-toggle:hover { border-color: var(--sage-400); }
+    .equipment-toggle.selected {
+      background: var(--sage-100);
+      border-color: var(--sage-500);
+      color: var(--sage-700);
+    }
+    .equipment-toggle svg {
+      width: 20px; height: 20px;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="mainView">
+      <header class="header">
+        <div class="header-top">
+          <div class="logo">Mise <span>en Place</span></div>
+          <div class="header-actions">
+            <button class="icon-btn" onclick="enterFocusMode()" title="Focus Mode">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button class="icon-btn active" onclick="toggleEnergyFilter()" title="Toggle energy filter" id="filterToggle">
+              <svg class="icon" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            </button>
+            <button class="icon-btn" onclick="openSettings()" title="Settings">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="energy-selector" id="energySelector">
+          <div class="energy-buttons" id="energyButtons">
+            <button class="energy-btn" data-energy="1" onclick="setEnergy(1)"><span>🪫</span>Low</button>
+            <button class="energy-btn active" data-energy="2" onclick="setEnergy(2)"><span>⚡</span>Medium</button>
+            <button class="energy-btn" data-energy="3" onclick="setEnergy(3)"><span>🔥</span>High</button>
+          </div>
+        </div>
+        <div class="zone-indicator">
+          <div class="zone-label">Week <span id="weekNumber">1</span> • This Week's Zone</div>
+          <div class="zone-name" id="currentZoneName">Living Room</div>
+          <div class="zone-progress">
+            <div class="progress-bar"><div class="progress-fill" id="zoneProgress" style="width: 0%"></div></div>
+            <div class="progress-text" id="zoneProgressText">0%</div>
+          </div>
+        </div>
+      </header>
+      <div class="timer-float">
+        <div class="timer-container">
+          <div class="timer-ring">
+            <svg viewBox="0 0 80 80">
+              <circle class="timer-ring-bg" cx="40" cy="40" r="36"/>
+              <circle class="timer-ring-progress" id="timerProgress" cx="40" cy="40" r="36" stroke-dasharray="226.19" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-display" id="timerDisplay">20:00</div>
+          </div>
+          <div class="timer-info">
+            <div class="timer-label">Daily Timer</div>
+            <div class="timer-status" id="timerStatus">Ready to start</div>
+          </div>
+          <div class="timer-controls">
+            <button class="timer-btn timer-btn-primary" onclick="toggleTimer()">
+              <svg class="icon" viewBox="0 0 24 24" id="playIcon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg class="icon" viewBox="0 0 24 24" id="pauseIcon" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+            <button class="timer-btn timer-btn-secondary" onclick="resetTimer()">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <main class="main-content">
+        <div class="section-header">
+          <h2 class="section-title">Daily Essentials</h2>
+          <div class="section-actions">
+            <span class="section-count" id="dailyCount">0/5</span>
+            <button class="edit-section-btn" onclick="openDailyEditor()" title="Edit daily tasks">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="task-list" id="dailyTasks"></div>
+        <div class="section-header">
+          <h2 class="section-title">Zone Tasks</h2>
+          <div class="section-actions">
+            <span class="section-count" id="zoneCount">0/7</span>
+            <button class="edit-section-btn" onclick="openZoneEditor()" title="Edit zone tasks">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="task-list" id="zoneTasks"></div>
+        <div class="streak-banner">
+          <div class="streak-icon">✨</div>
+          <div class="streak-content">
+            <div class="streak-label">Current Streak</div>
+            <div class="streak-value" id="streakValue">0 days</div>
+          </div>
+        </div>
+        <div class="affirmation" id="affirmation">Progress, not perfection. You're doing great.</div>
+      </main>
+      <nav class="bottom-nav">
+        <button class="nav-item active">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Today
+        </button>
+        <button class="nav-item" onclick="openZonesManager()">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Zones
+        </button>
+        <button class="nav-item" onclick="openHistory()">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          History
+        </button>
+        <button class="nav-item" onclick="openWeeklyReview()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Review
+        </button>
+      </nav>
+    </div>
+
+    <!-- Focus Mode -->
+    <div class="focus-overlay" id="focusOverlay">
+      <div class="focus-header">
+        <div class="logo">Mise <span>en Place</span></div>
+        <button class="focus-close" onclick="exitFocusMode()">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="focus-content">
+        <div id="focusActiveContent">
+          <div class="focus-timer">
+            <svg viewBox="0 0 200 200">
+              <circle class="focus-timer-bg" cx="100" cy="100" r="90"/>
+              <circle class="focus-timer-progress" id="focusTimerProgress" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"/>
+            </svg>
+            <div class="focus-timer-display" id="focusTimerDisplay">20:00</div>
+          </div>
+          <div class="focus-task-label">Current Task</div>
+          <div class="focus-task-text" id="focusTaskText">Loading...</div>
+          <div class="focus-actions">
+            <button class="focus-btn focus-btn-primary" onclick="completeFocusTask()">Done ✓</button>
+            <button class="focus-btn focus-btn-skip" onclick="skipFocusTask()">Skip for now</button>
+          </div>
+        </div>
+        <div class="focus-complete-msg" id="focusCompleteMsg">
+          <h2>Amazing work! 🎉</h2>
+          <p>You've completed your cleaning session.</p>
+          <button class="focus-btn focus-btn-primary" onclick="exitFocusMode()">Back to Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Settings</h2>
+          <button class="modal-close" onclick="closeModal('settingsModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-group">
+            <label class="settings-label">Timer Duration</label>
+            <div class="timer-presets">
+              <button class="timer-preset" data-minutes="15" onclick="setTimerPreset(15)">15 min</button>
+              <button class="timer-preset active" data-minutes="20" onclick="setTimerPreset(20)">20 min</button>
+              <button class="timer-preset" data-minutes="30" onclick="setTimerPreset(30)">30 min</button>
+            </div>
+          </div>
+          <div class="settings-group">
+            <label class="settings-label">Zones Rotation</label>
+            <div class="zone-list" id="zoneListSettings"></div>
+          </div>
+          <button class="btn btn-secondary" onclick="resetAllData()" style="margin-top: 16px;">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Review Modal -->
+    <div class="modal-overlay" id="reviewModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Weekly Review</h2>
+          <button class="modal-close" onclick="closeModal('reviewModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <div id="reviewZoneName" style="text-align:center; font-family: var(--font-serif); font-size: 1.25rem; color: var(--sage-700); margin-bottom: 20px;"></div>
+          <div class="review-stats">
+            <div class="review-stat success"><div class="review-stat-value" id="reviewCompleted">0</div><div class="review-stat-label">Completed</div></div>
+            <div class="review-stat"><div class="review-stat-value" id="reviewSkipped">0</div><div class="review-stat-label">Remaining</div></div>
+          </div>
+          <div class="review-tasks"><div class="review-tasks-title">Completed Tasks</div><div id="reviewCompletedList"></div></div>
+          <div class="review-tasks"><div class="review-tasks-title">Didn't Get To</div><div id="reviewSkippedList"></div></div>
+          <div style="font-style: italic; text-align: center; color: var(--sage-600); margin: 24px 0; font-family: var(--font-serif);">Let it go — there's always next rotation ✨</div>
+          <button class="btn btn-primary" onclick="moveToNextZone()">Move to Next Zone →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal-overlay" id="historyModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">History</h2>
+          <button class="modal-close" onclick="closeModal('historyModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body"><div class="calendar" id="calendar"></div></div>
+      </div>
+    </div>
+
+    <!-- Daily Tasks Editor -->
+    <div class="modal-overlay" id="dailyEditorModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Edit Daily Tasks</h2>
+          <button class="modal-close" onclick="closeModal('dailyEditorModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <div id="dailyEditorList"></div>
+          <button class="add-task-btn" onclick="addDailyTask()">
+            <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Task
+          </button>
+          <button class="btn btn-primary" onclick="saveDailyEdits()" style="margin-top: 16px;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone Tasks Editor -->
+    <div class="modal-overlay" id="zoneEditorModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title" id="zoneEditorTitle">Edit Zone Tasks</h2>
+          <button class="modal-close" onclick="closeModal('zoneEditorModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-group">
+            <label class="settings-label">Zone Name</label>
+            <input type="text" class="settings-input" id="zoneNameInput">
+          </div>
+          <div class="settings-group">
+            <label class="settings-label">Tasks</label>
+            <div id="zoneEditorList"></div>
+            <button class="add-task-btn" onclick="addZoneTask()">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Task
+            </button>
+          </div>
+          <button class="btn btn-primary" onclick="saveZoneEdits()" style="margin-top: 16px;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal-overlay" id="resetConfirmModal">
+      <div class="modal" style="max-width: 320px;">
+        <div class="modal-header">
+          <h2 class="modal-title">Reset All Data?</h2>
+          <button class="modal-close" onclick="closeModal('resetConfirmModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <p style="color: var(--warm-gray); margin-bottom: 24px;">This will permanently delete all your zones, tasks, and progress. This action cannot be undone.</p>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" onclick="closeModal('resetConfirmModal')" style="flex: 1;">Cancel</button>
+            <button class="btn" onclick="confirmReset()" style="flex: 1; background: #c44; color: white;">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zones Manager Modal -->
+    <div class="modal-overlay" id="zonesManagerModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Manage Zones</h2>
+          <button class="modal-close" onclick="closeModal('zonesManagerModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 0.875rem; color: var(--warm-gray); margin-bottom: 16px;">Drag to reorder. Tap a zone to edit its tasks.</p>
+          <div class="zone-list" id="zonesManagerList"></div>
+          <button class="add-task-btn" onclick="addNewZone()" style="margin-top: 16px;">
+            <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Zone
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    const DEFAULT_ZONES = [
+      { id: 1, name: "Living Room & Balcony", tasks: [
+        { text: "Wipe TV console and surfaces", effort: 1, equipment: ['cloth', 'duster'] },
+        { text: "Vacuum/mop floor", effort: 2, equipment: ['vacuum', 'mop'] },
+        { text: "Clean window grilles", effort: 3, equipment: ['spray', 'cloth', 'brush'] },
+        { text: "Dust ceiling fan", effort: 2, equipment: ['duster'] },
+        { text: "Wipe down sofa", effort: 2, equipment: ['vacuum', 'cloth'] },
+        { text: "Tidy balcony plants", effort: 1, equipment: [] },
+        { text: "Clean balcony floor", effort: 2, equipment: ['broom', 'mop', 'bucket'] }
+      ]},
+      { id: 2, name: "Kitchen", tasks: [
+        { text: "Deep clean stove & hood", effort: 3, equipment: ['spray', 'sponge', 'gloves', 'brush'] },
+        { text: "Wipe down cabinets", effort: 2, equipment: ['spray', 'cloth'] },
+        { text: "Clean inside fridge", effort: 3, equipment: ['spray', 'cloth', 'sponge'] },
+        { text: "Scrub sink thoroughly", effort: 2, equipment: ['spray', 'sponge', 'brush'] },
+        { text: "Wipe appliances", effort: 1, equipment: ['spray', 'cloth'] },
+        { text: "Clean floor & drain", effort: 2, equipment: ['mop', 'bucket', 'brush'] },
+        { text: "Organize dry goods", effort: 1, equipment: [] }
+      ]},
+      { id: 3, name: "Master Bedroom", tasks: [
+        { text: "Change bed linens", effort: 2, equipment: ['laundry'] },
+        { text: "Vacuum mattress", effort: 2, equipment: ['vacuum'] },
+        { text: "Clean wardrobe surfaces", effort: 1, equipment: ['cloth', 'duster'] },
+        { text: "Wipe window sills", effort: 1, equipment: ['spray', 'cloth'] },
+        { text: "Dust bedside tables", effort: 1, equipment: ['duster', 'cloth'] },
+        { text: "Organize dresser", effort: 2, equipment: [] },
+        { text: "Mop floor under bed", effort: 3, equipment: ['mop', 'bucket', 'vacuum'] }
+      ]},
+      { id: 4, name: "Common Bedroom", tasks: [
+        { text: "Change bed linens", effort: 2, equipment: ['laundry'] },
+        { text: "Vacuum under furniture", effort: 2, equipment: ['vacuum'] },
+        { text: "Wipe desk & shelves", effort: 1, equipment: ['spray', 'cloth', 'duster'] },
+        { text: "Organize storage", effort: 2, equipment: [] },
+        { text: "Clean window grilles", effort: 2, equipment: ['spray', 'cloth', 'brush'] },
+        { text: "Dust surfaces", effort: 1, equipment: ['duster'] },
+        { text: "Mop floor", effort: 2, equipment: ['mop', 'bucket'] }
+      ]},
+      { id: 5, name: "Bathrooms", tasks: [
+        { text: "Scrub toilet bowl", effort: 2, equipment: ['brush', 'spray', 'gloves'] },
+        { text: "Clean shower area", effort: 2, equipment: ['spray', 'sponge', 'squeegee'] },
+        { text: "Wipe mirror & basin", effort: 1, equipment: ['spray', 'cloth'] },
+        { text: "Descale taps & showerhead", effort: 3, equipment: ['spray', 'brush', 'cloth', 'gloves'] },
+        { text: "Clean floor & drain", effort: 2, equipment: ['brush', 'mop', 'bucket'] },
+        { text: "Wash bathroom mats", effort: 2, equipment: ['laundry'] },
+        { text: "Wipe cabinet surfaces", effort: 1, equipment: ['spray', 'cloth'] }
+      ]}
+    ];
+    const DEFAULT_DAILY = [
+      { id: 'd1', text: "Clear dining table", effort: 1, equipment: [] },
+      { id: 'd2', text: "Wipe dining table", effort: 1, equipment: ['spray', 'cloth'] },
+      { id: 'd3', text: "Wipe high chair", effort: 1, equipment: ['spray', 'cloth'] },
+      { id: 'd4', text: "Pick up toys", effort: 2, equipment: [] },
+      { id: 'd5', text: "Prep bag for next day", effort: 2, equipment: [] },
+      { id: 'd6', text: "Load laundry", effort: 1, equipment: ['laundry'] }
+    ];
+    const EFFORT_LABELS = { 1: 'Low effort', 2: 'Medium effort', 3: 'High effort' };
+    
+    const EQUIPMENT = {
+      spray: { name: 'Cleaning spray', icon: '<svg viewBox="0 0 24 24"><path d="M9 6l2-4h2l2 4"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M10 10v10a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V10"/><path d="M8 14h8"/><path d="M12 2v2"/></svg>' },
+      cloth: { name: 'Cloth/Rag', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M8 6v4"/><path d="M16 6v4"/></svg>' },
+      broom: { name: 'Broom', icon: '<svg viewBox="0 0 24 24"><path d="M12 2v8"/><path d="M4 22l4-12h8l4 12"/><path d="M7 14h10"/></svg>' },
+      mop: { name: 'Mop', icon: '<svg viewBox="0 0 24 24"><path d="M12 2v10"/><rect x="8" y="12" width="8" height="3" rx="1"/><path d="M6 15v7"/><path d="M10 15v7"/><path d="M14 15v7"/><path d="M18 15v7"/></svg>' },
+      vacuum: { name: 'Vacuum', icon: '<svg viewBox="0 0 24 24"><circle cx="8" cy="18" r="3"/><path d="M11 18h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3"/><path d="M14 6l-4 6"/><path d="M8 15V6a2 2 0 0 1 2-2h1"/></svg>' },
+      bucket: { name: 'Bucket', icon: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-2 12H7L5 8z"/><path d="M4 8a8 8 0 0 1 16 0"/><path d="M9 8v2"/><path d="M15 8v2"/></svg>' },
+      sponge: { name: 'Sponge', icon: '<svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="10" rx="2"/><circle cx="8" cy="13" r="1"/><circle cx="12" cy="11" r="1"/><circle cx="16" cy="14" r="1"/><circle cx="10" cy="15" r="1"/><circle cx="14" cy="13" r="1"/></svg>' },
+      gloves: { name: 'Gloves', icon: '<svg viewBox="0 0 24 24"><path d="M6 10V5a2 2 0 0 1 4 0v3"/><path d="M10 8V4a2 2 0 0 1 4 0v4"/><path d="M14 8V5a2 2 0 0 1 4 0v5"/><path d="M6 10a4 4 0 0 0 0 8h12a4 4 0 0 0 0-8"/><path d="M6 18v2"/><path d="M18 18v2"/></svg>' },
+      duster: { name: 'Duster', icon: '<svg viewBox="0 0 24 24"><path d="M4 20l8-8"/><circle cx="14" cy="10" r="6"/><path d="M11 7c1-1 3-1 4 0s1 3 0 4"/></svg>' },
+      iron: { name: 'Iron', icon: '<svg viewBox="0 0 24 24"><path d="M3 18h18v-4L12 8H4a2 2 0 0 0-2 2v6a2 2 0 0 0 1 2z"/><path d="M21 14l-9-6"/><path d="M7 18v2"/><path d="M17 18v2"/></svg>' },
+      brush: { name: 'Scrub brush', icon: '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="8" rx="2"/><path d="M8 12v6"/><path d="M12 12v6"/><path d="M16 12v6"/><path d="M6 8h12"/></svg>' },
+      squeegee: { name: 'Squeegee', icon: '<svg viewBox="0 0 24 24"><path d="M4 6h16a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M12 12v8"/></svg>' },
+      bin: { name: 'Trash bag', icon: '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/></svg>' },
+      laundry: { name: 'Laundry basket', icon: '<svg viewBox="0 0 24 24"><path d="M4 6l2 14h12l2-14"/><path d="M2 6h20"/><path d="M8 6V4"/><path d="M16 6V4"/><path d="M9 11c1 2 5 2 6 0"/></svg>' }
+    };
+    const AFFIRMATIONS = [
+      "Progress, not perfection. You're doing great.",
+      "A clean home doesn't happen overnight. Be patient.",
+      "Every small step counts. You've got this.",
+      "15 minutes can make a real difference.",
+      "Done is better than perfect.",
+      "You deserve a peaceful space."
+    ];
+
+    let state = {
+      zones: [], dailyTasks: [], currentZoneIndex: 0,
+      weekStartDate: null, timerMinutes: 20, timerSeconds: 0,
+      timerRunning: false, timerInterval: null, streak: 0,
+      lastActiveDate: null, dailyLog: {}, energyLevel: 2,
+      filterVisible: true, filterActive: true,
+      calendarMonth: new Date().getMonth(), calendarYear: new Date().getFullYear(),
+      selectedDate: null, focusTasks: [], focusIndex: 0
+    };
+
+    function init() {
+      loadState();
+      checkStreak();
+      renderAll();
+      document.getElementById('affirmation').textContent = AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)];
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('miseEnPlaceState');
+      if (saved) {
+        const p = JSON.parse(saved);
+        state = { ...state, ...p };
+        state.timerSeconds = state.timerMinutes * 60;
+        state.timerRunning = false;
+      } else {
+        state.zones = JSON.parse(JSON.stringify(DEFAULT_ZONES));
+        state.dailyTasks = JSON.parse(JSON.stringify(DEFAULT_DAILY));
+        state.weekStartDate = getWeekStart();
+        state.timerSeconds = state.timerMinutes * 60;
+        saveState();
+      }
+    }
+
+    function saveState() {
+      const s = { ...state };
+      delete s.timerInterval; delete s.timerRunning;
+      localStorage.setItem('miseEnPlaceState', JSON.stringify(s));
+    }
+
+    function getWeekStart() {
+      const d = new Date(); d.setDate(d.getDate() - d.getDay());
+      return d.toISOString().split('T')[0];
+    }
+
+    function getTodayKey() { return new Date().toISOString().split('T')[0]; }
+
+    function checkStreak() {
+      const today = getTodayKey();
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      const yKey = yesterday.toISOString().split('T')[0];
+      if (state.lastActiveDate && state.lastActiveDate !== today && state.lastActiveDate !== yKey) {
+        state.streak = 0; saveState();
+      }
+    }
+
+    function renderAll() {
+      renderZoneHeader(); renderDailyTasks(); renderZoneTasks();
+      renderTimer(); updateProgress(); updateStreak(); updateEnergyUI();
+      updateFilterUI();
+    }
+
+    function renderZoneHeader() {
+      const z = state.zones[state.currentZoneIndex];
+      document.getElementById('currentZoneName').textContent = z.name;
+      document.getElementById('weekNumber').textContent = state.currentZoneIndex + 1;
+    }
+
+    function setEnergy(level) {
+      state.energyLevel = level; saveState();
+      updateEnergyUI(); renderDailyTasks(); renderZoneTasks();
+    }
+
+    function toggleEnergyFilter() {
+      state.filterActive = !state.filterActive;
+      saveState();
+      updateFilterUI();
+      renderDailyTasks();
+      renderZoneTasks();
+    }
+
+    function updateFilterUI() {
+      const toggle = document.getElementById('filterToggle');
+      const buttons = document.getElementById('energyButtons');
+      toggle.classList.toggle('active', state.filterActive);
+      buttons.classList.toggle('hidden', !state.filterActive);
+    }
+
+    function updateEnergyUI() {
+      document.querySelectorAll('.energy-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.energy) === state.energyLevel);
+      });
+    }
+
+    function shouldShowTask(taskEffort, isCompleted) {
+      // If filter is off, show all tasks
+      if (!state.filterActive) return true;
+      // Completed tasks always show
+      if (isCompleted) return true;
+      // Filter: show tasks at or below current energy level
+      return taskEffort <= state.energyLevel;
+    }
+
+    function renderEquipmentIcons(equipment) {
+      if (!equipment || equipment.length === 0) return '';
+      return `<div class="task-equipment">${equipment.map(e => 
+        EQUIPMENT[e] ? `<div class="task-equipment-icon" title="${EQUIPMENT[e].name}">${EQUIPMENT[e].icon}</div>` : ''
+      ).join('')}</div>`;
+    }
+
+    function renderDailyTasks() {
+      const c = document.getElementById('dailyTasks');
+      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      let vis = 0, done = 0;
+      c.innerHTML = state.dailyTasks.map(t => {
+        const comp = log.daily && log.daily[t.id];
+        const show = shouldShowTask(t.effort, comp);
+        if (show) vis++;
+        if (comp) done++;
+        return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="toggleDaily('${t.id}')">
+          <div class="task-checkbox"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="task-content">
+            <div class="task-text">${t.text}</div>
+            <div class="task-meta"><span class="effort-dot ${t.effort === 1 ? 'low' : t.effort === 2 ? 'med' : 'high'}"></span>${EFFORT_LABELS[t.effort]}</div>
+          </div>
+          ${renderEquipmentIcons(t.equipment)}
+        </div>`;
+      }).join('');
+      document.getElementById('dailyCount').textContent = `${done}/${vis}`;
+    }
+
+    function renderZoneTasks() {
+      const c = document.getElementById('zoneTasks');
+      const z = state.zones[state.currentZoneIndex];
+      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      let vis = 0, done = 0;
+      c.innerHTML = z.tasks.map((t, i) => {
+        const id = `z${state.currentZoneIndex}_${i}`;
+        const comp = log.zone && log.zone[id];
+        const show = shouldShowTask(t.effort, comp);
+        if (show) vis++;
+        if (comp) done++;
+        return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="toggleZone('${id}')">
+          <div class="task-checkbox"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="task-content">
+            <div class="task-text">${t.text}</div>
+            <div class="task-meta"><span class="effort-dot ${t.effort === 1 ? 'low' : t.effort === 2 ? 'med' : 'high'}"></span>${EFFORT_LABELS[t.effort]}</div>
+          </div>
+          ${renderEquipmentIcons(t.equipment)}
+        </div>`;
+      }).join('');
+      document.getElementById('zoneCount').textContent = `${done}/${vis}`;
+    }
+
+    function toggleDaily(id) {
+      const k = getTodayKey();
+      if (!state.dailyLog[k]) state.dailyLog[k] = { daily: {}, zone: {} };
+      state.dailyLog[k].daily[id] = !state.dailyLog[k].daily[id];
+      recordActivity(); saveState(); renderDailyTasks(); updateProgress();
+    }
+
+    function toggleZone(id) {
+      const k = getTodayKey();
+      if (!state.dailyLog[k]) state.dailyLog[k] = { daily: {}, zone: {} };
+      state.dailyLog[k].zone[id] = !state.dailyLog[k].zone[id];
+      recordActivity(); saveState(); renderZoneTasks(); updateProgress();
+    }
+
+    function recordActivity() {
+      const today = getTodayKey();
+      if (state.lastActiveDate !== today) {
+        state.streak++; state.lastActiveDate = today;
+        updateStreak(); showToast(`Streak: ${state.streak} day${state.streak > 1 ? 's' : ''} 🌟`);
+      }
+    }
+
+    function updateProgress() {
+      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      const z = state.zones[state.currentZoneIndex];
+      const dc = Object.values(log.daily || {}).filter(Boolean).length;
+      const zc = Object.values(log.zone || {}).filter(Boolean).length;
+      const total = state.dailyTasks.length + z.tasks.length;
+      const pct = total > 0 ? Math.round(((dc + zc) / total) * 100) : 0;
+      document.getElementById('zoneProgress').style.width = `${pct}%`;
+      document.getElementById('zoneProgressText').textContent = `${pct}%`;
+    }
+
+    function updateStreak() {
+      document.getElementById('streakValue').textContent = `${state.streak || 0} day${state.streak !== 1 ? 's' : ''}`;
+    }
+
+    // Timer
+    function renderTimer() { updateTimerDisplay(); }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(state.timerSeconds / 60);
+      const s = state.timerSeconds % 60;
+      const display = `${m}:${s.toString().padStart(2, '0')}`;
+      document.getElementById('timerDisplay').textContent = display;
+      document.getElementById('focusTimerDisplay').textContent = display;
+      const total = state.timerMinutes * 60;
+      const prog = ((total - state.timerSeconds) / total) * 226.19;
+      document.getElementById('timerProgress').style.strokeDashoffset = 226.19 - prog;
+      const focusProg = ((total - state.timerSeconds) / total) * 565.48;
+      document.getElementById('focusTimerProgress').style.strokeDashoffset = 565.48 - focusProg;
+      const status = state.timerRunning ? "Time to tidy!" : state.timerSeconds === 0 ? "Great job! 🎉" : state.timerSeconds < total ? "Paused" : "Ready to start";
+      document.getElementById('timerStatus').textContent = status;
+    }
+
+    function toggleTimer() {
+      if (state.timerRunning) pauseTimer(); else startTimer();
+    }
+
+    function startTimer() {
+      if (state.timerSeconds === 0) state.timerSeconds = state.timerMinutes * 60;
+      state.timerRunning = true;
+      document.getElementById('playIcon').style.display = 'none';
+      document.getElementById('pauseIcon').style.display = 'block';
+      state.timerInterval = setInterval(() => {
+        state.timerSeconds--;
+        updateTimerDisplay();
+        if (state.timerSeconds <= 0) timerDone();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      state.timerRunning = false;
+      clearInterval(state.timerInterval);
+      document.getElementById('playIcon').style.display = 'block';
+      document.getElementById('pauseIcon').style.display = 'none';
+      updateTimerDisplay();
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      state.timerSeconds = state.timerMinutes * 60;
+      updateTimerDisplay();
+    }
+
+    function timerDone() {
+      pauseTimer(); state.timerSeconds = 0; updateTimerDisplay();
+      showToast("Time's up! Amazing work! 🎉");
+      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+    }
+
+    function setTimerPreset(min) {
+      state.timerMinutes = min;
+      state.timerSeconds = min * 60;
+      document.querySelectorAll('.timer-preset').forEach(b => b.classList.toggle('active', parseInt(b.dataset.minutes) === min));
+      updateTimerDisplay(); saveState();
+    }
+
+    // Focus Mode
+    function enterFocusMode() {
+      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      const z = state.zones[state.currentZoneIndex];
+      state.focusTasks = [];
+      
+      // Gather uncompleted tasks that pass the current filter
+      state.dailyTasks.forEach(t => {
+        const comp = log.daily && log.daily[t.id];
+        if (!comp && shouldShowTask(t.effort, false)) {
+          state.focusTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort });
+        }
+      });
+      z.tasks.forEach((t, i) => {
+        const id = `z${state.currentZoneIndex}_${i}`;
+        const comp = log.zone && log.zone[id];
+        if (!comp && shouldShowTask(t.effort, false)) {
+          state.focusTasks.push({ type: 'zone', id, text: t.text, effort: t.effort });
+        }
+      });
+      
+      // Shuffle the tasks for random order
+      for (let i = state.focusTasks.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.focusTasks[i], state.focusTasks[j]] = [state.focusTasks[j], state.focusTasks[i]];
+      }
+      
+      state.focusIndex = 0;
+      document.getElementById('focusOverlay').classList.add('active');
+      document.getElementById('focusActiveContent').style.display = 'block';
+      document.getElementById('focusCompleteMsg').classList.remove('show');
+      updateFocusTask();
+      
+      // Start timer if not already running
+      if (!state.timerRunning) {
+        if (state.timerSeconds === 0) state.timerSeconds = state.timerMinutes * 60;
+        startTimer();
+      }
+    }
+
+    function updateFocusTask() {
+      if (state.focusIndex >= state.focusTasks.length) {
+        document.getElementById('focusActiveContent').style.display = 'none';
+        document.getElementById('focusCompleteMsg').classList.add('show');
+        return;
+      }
+      const task = state.focusTasks[state.focusIndex];
+      document.getElementById('focusTaskText').textContent = task.text;
+    }
+
+    function completeFocusTask() {
+      if (state.focusIndex >= state.focusTasks.length) return;
+      const t = state.focusTasks[state.focusIndex];
+      if (t.type === 'daily') toggleDaily(t.id);
+      else toggleZone(t.id);
+      state.focusIndex++;
+      updateFocusTask();
+    }
+
+    function skipFocusTask() {
+      state.focusIndex++;
+      updateFocusTask();
+    }
+
+    function exitFocusMode() {
+      document.getElementById('focusOverlay').classList.remove('active');
+      renderAll();
+    }
+
+    // Modals
+    function openSettings() {
+      renderZoneListSettings();
+      document.querySelectorAll('.timer-preset').forEach(b => b.classList.toggle('active', parseInt(b.dataset.minutes) === state.timerMinutes));
+      document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function renderZoneListSettings() {
+      document.getElementById('zoneListSettings').innerHTML = state.zones.map((z, i) =>
+        `<div class="zone-item ${i === state.currentZoneIndex ? 'current' : ''}" onclick="jumpToZone(${i})">
+          <div class="zone-number">${i + 1}</div>
+          <div class="zone-item-name">${z.name}</div>
+          ${i === state.currentZoneIndex ? '<span class="zone-item-badge">Current</span>' : ''}
+        </div>`
+      ).join('');
+    }
+
+    function jumpToZone(i) {
+      state.currentZoneIndex = i; saveState();
+      closeModal('settingsModal'); renderAll();
+      showToast(`Switched to ${state.zones[i].name}`);
+    }
+
+    function openWeeklyReview() {
+      const z = state.zones[state.currentZoneIndex];
+      document.getElementById('reviewZoneName').textContent = z.name;
+      let done = [], skip = [...z.tasks.map(t => t.text)];
+      Object.values(state.dailyLog).forEach(log => {
+        if (log.zone) {
+          Object.entries(log.zone).forEach(([k, v]) => {
+            if (k.startsWith(`z${state.currentZoneIndex}_`) && v) {
+              const idx = parseInt(k.split('_')[1]);
+              const txt = z.tasks[idx]?.text;
+              if (txt && !done.includes(txt)) {
+                done.push(txt);
+                const si = skip.indexOf(txt);
+                if (si > -1) skip.splice(si, 1);
+              }
+            }
+          });
+        }
+      });
+      document.getElementById('reviewCompleted').textContent = done.length;
+      document.getElementById('reviewSkipped').textContent = skip.length;
+      document.getElementById('reviewCompletedList').innerHTML = done.length ? done.map(t => `<div class="review-task"><svg class="review-task-icon done" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${t}</div>`).join('') : '<div class="day-detail-empty">No tasks completed yet</div>';
+      document.getElementById('reviewSkippedList').innerHTML = skip.length ? skip.map(t => `<div class="review-task"><svg class="review-task-icon skipped" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>${t}</div>`).join('') : '<div class="day-detail-empty">All done! 🎉</div>';
+      document.getElementById('reviewModal').classList.add('active');
+    }
+
+    function moveToNextZone() {
+      Object.keys(state.dailyLog).forEach(k => { if (state.dailyLog[k].zone) state.dailyLog[k].zone = {}; });
+      state.currentZoneIndex = (state.currentZoneIndex + 1) % state.zones.length;
+      state.weekStartDate = getWeekStart();
+      saveState(); closeModal('reviewModal'); renderAll();
+      showToast(`Welcome to ${state.zones[state.currentZoneIndex].name}!`);
+    }
+
+    function openHistory() {
+      state.calendarMonth = new Date().getMonth();
+      state.calendarYear = new Date().getFullYear();
+      state.selectedDate = null;
+      renderCalendar();
+      document.getElementById('historyModal').classList.add('active');
+    }
+
+    function renderCalendar() {
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const first = new Date(state.calendarYear, state.calendarMonth, 1);
+      const last = new Date(state.calendarYear, state.calendarMonth + 1, 0);
+      const startDay = first.getDay();
+      const daysInMonth = last.getDate();
+      let html = `<div class="calendar-header">
+        <div class="calendar-title">${months[state.calendarMonth]} ${state.calendarYear}</div>
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" onclick="prevMonth()"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="calendar-nav-btn" onclick="nextMonth()"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+      <div class="calendar-weekdays">
+        <div class="calendar-weekday">Sun</div><div class="calendar-weekday">Mon</div><div class="calendar-weekday">Tue</div>
+        <div class="calendar-weekday">Wed</div><div class="calendar-weekday">Thu</div><div class="calendar-weekday">Fri</div><div class="calendar-weekday">Sat</div>
+      </div>
+      <div class="calendar-days">`;
+      const today = getTodayKey();
+      for (let i = 0; i < startDay; i++) html += `<div class="calendar-day other-month"></div>`;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${state.calendarYear}-${String(state.calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const hasAct = state.dailyLog[dateStr] && (Object.values(state.dailyLog[dateStr].daily || {}).some(Boolean) || Object.values(state.dailyLog[dateStr].zone || {}).some(Boolean));
+        const isToday = dateStr === today;
+        const isSel = dateStr === state.selectedDate;
+        html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasAct ? 'has-activity' : ''} ${isSel ? 'selected' : ''}" onclick="selectDate('${dateStr}')">${d}</div>`;
+      }
+      html += `</div>`;
+      if (state.selectedDate) {
+        const log = state.dailyLog[state.selectedDate] || { daily: {}, zone: {} };
+        const tasks = [];
+        state.dailyTasks.forEach(t => { if (log.daily && log.daily[t.id]) tasks.push(t.text); });
+        state.zones.forEach((z, zi) => {
+          z.tasks.forEach((t, ti) => { if (log.zone && log.zone[`z${zi}_${ti}`]) tasks.push(`${z.name}: ${t.text}`); });
+        });
+        html += `<div class="day-detail"><div class="day-detail-title">${state.selectedDate}</div>`;
+        html += tasks.length ? tasks.map(t => `<div class="review-task"><svg class="review-task-icon done" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${t}</div>`).join('') : '<div class="day-detail-empty">No tasks completed</div>';
+        html += '</div>';
+      }
+      document.getElementById('calendar').innerHTML = html;
+    }
+
+    function prevMonth() {
+      state.calendarMonth--;
+      if (state.calendarMonth < 0) { state.calendarMonth = 11; state.calendarYear--; }
+      state.selectedDate = null; renderCalendar();
+    }
+
+    function nextMonth() {
+      state.calendarMonth++;
+      if (state.calendarMonth > 11) { state.calendarMonth = 0; state.calendarYear++; }
+      state.selectedDate = null; renderCalendar();
+    }
+
+    function selectDate(d) { state.selectedDate = d; renderCalendar(); }
+
+    // Task editors
+    function openDailyEditor() {
+      renderDailyEditorList();
+      document.getElementById('dailyEditorModal').classList.add('active');
+    }
+
+    function renderEquipmentSelector(selectedEquipment, taskIndex, type) {
+      const selected = selectedEquipment || [];
+      return `<div class="equipment-selector" data-task="${taskIndex}" data-type="${type}">
+        ${Object.entries(EQUIPMENT).map(([key, eq]) => `
+          <button type="button" class="equipment-toggle ${selected.includes(key) ? 'selected' : ''}" 
+                  data-equipment="${key}" 
+                  title="${eq.name}"
+                  onclick="toggleEquipment('${type}', ${taskIndex}, '${key}')">
+            ${eq.icon}
+          </button>
+        `).join('')}
+      </div>`;
+    }
+
+    function toggleEquipment(type, taskIndex, equipmentKey) {
+      let task;
+      if (type === 'daily') {
+        task = state.dailyTasks[taskIndex];
+      } else {
+        task = state.zones[state.currentZoneIndex].tasks[taskIndex];
+      }
+      
+      if (!task.equipment) task.equipment = [];
+      
+      const idx = task.equipment.indexOf(equipmentKey);
+      if (idx > -1) {
+        task.equipment.splice(idx, 1);
+      } else {
+        task.equipment.push(equipmentKey);
+      }
+      
+      // Update button state
+      const btn = document.querySelector(`.equipment-selector[data-task="${taskIndex}"][data-type="${type}"] .equipment-toggle[data-equipment="${equipmentKey}"]`);
+      if (btn) btn.classList.toggle('selected', idx === -1);
+    }
+
+    function renderDailyEditorList() {
+      document.getElementById('dailyEditorList').innerHTML = state.dailyTasks.map((t, i) => `
+        <div class="edit-task-item" style="flex-direction: column; align-items: stretch;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="text" class="edit-task-input" value="${t.text}" data-index="${i}">
+            <select class="effort-select" data-index="${i}">
+              <option value="1" ${t.effort === 1 ? 'selected' : ''}>Low</option>
+              <option value="2" ${t.effort === 2 ? 'selected' : ''}>Medium</option>
+              <option value="3" ${t.effort === 3 ? 'selected' : ''}>High</option>
+            </select>
+            <button class="delete-task-btn" onclick="deleteDailyTask(${i})"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          ${renderEquipmentSelector(t.equipment, i, 'daily')}
+        </div>
+      `).join('');
+    }
+
+    function addDailyTask() {
+      state.dailyTasks.push({ id: 'd' + Date.now(), text: 'New task', effort: 1, equipment: [] });
+      renderDailyEditorList();
+    }
+
+    function deleteDailyTask(i) { state.dailyTasks.splice(i, 1); renderDailyEditorList(); }
+
+    function saveDailyEdits() {
+      const inputs = document.querySelectorAll('#dailyEditorList .edit-task-input');
+      const selects = document.querySelectorAll('#dailyEditorList .effort-select');
+      inputs.forEach((inp, i) => {
+        state.dailyTasks[i].text = inp.value;
+        state.dailyTasks[i].effort = parseInt(selects[i].value);
+      });
+      saveState(); closeModal('dailyEditorModal'); renderDailyTasks();
+      showToast('Daily tasks updated!');
+    }
+
+    function openZoneEditor() {
+      const z = state.zones[state.currentZoneIndex];
+      document.getElementById('zoneEditorTitle').textContent = `Edit ${z.name}`;
+      document.getElementById('zoneNameInput').value = z.name;
+      renderZoneEditorList();
+      document.getElementById('zoneEditorModal').classList.add('active');
+    }
+
+    function renderZoneEditorList() {
+      const z = state.zones[state.currentZoneIndex];
+      document.getElementById('zoneEditorList').innerHTML = z.tasks.map((t, i) => `
+        <div class="edit-task-item" style="flex-direction: column; align-items: stretch;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="text" class="edit-task-input" value="${t.text}" data-index="${i}">
+            <select class="effort-select" data-index="${i}">
+              <option value="1" ${t.effort === 1 ? 'selected' : ''}>Low</option>
+              <option value="2" ${t.effort === 2 ? 'selected' : ''}>Medium</option>
+              <option value="3" ${t.effort === 3 ? 'selected' : ''}>High</option>
+            </select>
+            <button class="delete-task-btn" onclick="deleteZoneTask(${i})"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          ${renderEquipmentSelector(t.equipment, i, 'zone')}
+        </div>
+      `).join('');
+    }
+
+    function addZoneTask() {
+      state.zones[state.currentZoneIndex].tasks.push({ text: 'New task', effort: 1, equipment: [] });
+      renderZoneEditorList();
+    }
+
+    function deleteZoneTask(i) { state.zones[state.currentZoneIndex].tasks.splice(i, 1); renderZoneEditorList(); }
+
+    function saveZoneEdits() {
+      const z = state.zones[state.currentZoneIndex];
+      z.name = document.getElementById('zoneNameInput').value;
+      const inputs = document.querySelectorAll('#zoneEditorList .edit-task-input');
+      const selects = document.querySelectorAll('#zoneEditorList .effort-select');
+      inputs.forEach((inp, i) => {
+        z.tasks[i].text = inp.value;
+        z.tasks[i].effort = parseInt(selects[i].value);
+      });
+      saveState(); closeModal('zoneEditorModal'); renderAll();
+      showToast('Zone updated!');
+    }
+
+    // Zones Manager
+    function openZonesManager() {
+      renderZonesManagerList();
+      document.getElementById('zonesManagerModal').classList.add('active');
+    }
+
+    function renderZonesManagerList() {
+      const container = document.getElementById('zonesManagerList');
+      container.innerHTML = state.zones.map((z, i) => `
+        <div class="zone-item ${i === state.currentZoneIndex ? 'current' : ''}" 
+             draggable="true" 
+             data-index="${i}"
+             ondragstart="dragStart(event)" 
+             ondragover="dragOver(event)" 
+             ondrop="drop(event)"
+             ondragend="dragEnd(event)">
+          <div class="zone-item-drag">
+            <svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px;"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+          </div>
+          <div class="zone-number">${i + 1}</div>
+          <div class="zone-item-name" onclick="editZoneFromManager(${i})">${z.name}</div>
+          ${i === state.currentZoneIndex ? '<span class="zone-item-badge">Current</span>' : ''}
+          <button class="delete-task-btn" onclick="event.stopPropagation(); deleteZone(${i})" ${state.zones.length <= 1 ? 'disabled style="opacity:0.3"' : ''}>
+            <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    let draggedIndex = null;
+
+    function dragStart(e) {
+      draggedIndex = parseInt(e.target.closest('.zone-item').dataset.index);
+      e.target.closest('.zone-item').classList.add('dragging');
+    }
+
+    function dragOver(e) {
+      e.preventDefault();
+    }
+
+    function drop(e) {
+      e.preventDefault();
+      const targetIndex = parseInt(e.target.closest('.zone-item').dataset.index);
+      if (draggedIndex !== null && draggedIndex !== targetIndex) {
+        const [removed] = state.zones.splice(draggedIndex, 1);
+        state.zones.splice(targetIndex, 0, removed);
+        // Adjust currentZoneIndex if needed
+        if (state.currentZoneIndex === draggedIndex) {
+          state.currentZoneIndex = targetIndex;
+        } else if (draggedIndex < state.currentZoneIndex && targetIndex >= state.currentZoneIndex) {
+          state.currentZoneIndex--;
+        } else if (draggedIndex > state.currentZoneIndex && targetIndex <= state.currentZoneIndex) {
+          state.currentZoneIndex++;
+        }
+        saveState();
+        renderZonesManagerList();
+        renderAll();
+      }
+    }
+
+    function dragEnd(e) {
+      document.querySelectorAll('.zone-item').forEach(el => el.classList.remove('dragging'));
+      draggedIndex = null;
+    }
+
+    function editZoneFromManager(index) {
+      state.currentZoneIndex = index;
+      saveState();
+      closeModal('zonesManagerModal');
+      openZoneEditor();
+    }
+
+    function addNewZone() {
+      state.zones.push({
+        id: Date.now(),
+        name: 'New Zone',
+        tasks: [{ text: 'Add your first task', effort: 1 }]
+      });
+      saveState();
+      renderZonesManagerList();
+      showToast('New zone added!');
+    }
+
+    function deleteZone(index) {
+      if (state.zones.length <= 1) return;
+      if (confirm(`Delete "${state.zones[index].name}"? This cannot be undone.`)) {
+        state.zones.splice(index, 1);
+        if (state.currentZoneIndex >= state.zones.length) {
+          state.currentZoneIndex = state.zones.length - 1;
+        }
+        saveState();
+        renderZonesManagerList();
+        renderAll();
+        showToast('Zone deleted');
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function resetAllData() {
+      closeModal('settingsModal');
+      document.getElementById('resetConfirmModal').classList.add('active');
+    }
+
+    function confirmReset() {
+      localStorage.removeItem('miseEnPlaceState');
+      location.reload();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+    });
+
+    init();
+  </script>
+</body>
+</html>
