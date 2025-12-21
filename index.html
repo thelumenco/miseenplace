@@ -75,7 +75,6 @@
       color: var(--sage-700);
       letter-spacing: -0.02em;
     }
-    .logo span { color: var(--sage-400); font-style: italic; }
     .header-actions { display: flex; gap: 8px; }
     .icon-btn {
       width: 40px; height: 40px;
@@ -172,9 +171,9 @@
     }
     .timer-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
     .timer-ring svg { transform: rotate(-90deg); width: 80px; height: 80px; }
-    .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.5); stroke-width: 4; }
+    .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.3); stroke-width: 4; }
     .timer-ring-progress {
-      fill: none; stroke: var(--sage-700); stroke-width: 4;
+      fill: none; stroke: white; stroke-width: 4;
       stroke-linecap: round; transition: stroke-dashoffset 0.5s ease;
     }
     .timer-display {
@@ -182,17 +181,17 @@
       transform: translate(-50%, -50%);
       font-family: var(--font-sans);
       font-size: 0.9rem; font-weight: 600;
-      color: var(--sage-800);
+      color: white;
     }
     .timer-info { flex: 1; }
     .timer-label {
-      font-size: 0.7rem; color: var(--sage-700);
+      font-size: 0.7rem; color: rgba(255,255,255,0.8);
       text-transform: uppercase; letter-spacing: 0.05em;
     }
     .timer-status {
       font-family: var(--font-serif);
       font-size: 1.25rem;
-      color: var(--sage-800);
+      color: white;
       font-weight: 600;
     }
     .timer-controls { display: flex; gap: 8px; }
@@ -282,23 +281,6 @@
     .effort-dot.low { background: var(--energy-low); }
     .effort-dot.med { background: var(--energy-med); }
     .effort-dot.high { background: var(--energy-high); }
-    .streak-banner {
-      background: linear-gradient(135deg, var(--sage-200) 0%, var(--sage-100) 100%);
-      border-radius: var(--radius-md); padding: 16px;
-      display: flex; align-items: center; gap: 12px;
-      margin-top: 24px;
-    }
-    .streak-icon { font-size: 1.5rem; }
-    .streak-content { flex: 1; }
-    .streak-label {
-      font-size: 0.75rem; color: var(--sage-700);
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .streak-value {
-      font-family: var(--font-serif);
-      font-size: 1.25rem; font-weight: 600;
-      color: var(--sage-800);
-    }
     .affirmation {
       text-align: center; padding: 32px 24px;
       color: var(--sage-600); font-style: italic;
@@ -351,7 +333,27 @@
     .focus-task-text {
       font-family: var(--font-serif);
       font-size: 1.5rem; color: var(--sage-800);
-      margin-bottom: 32px; max-width: 300px;
+      margin-bottom: 20px; max-width: 300px;
+    }
+    .focus-equipment {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center;
+      margin-bottom: 32px;
+      max-width: 320px;
+    }
+    .focus-equipment-item {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--sage-100);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      color: var(--sage-700);
+    }
+    .focus-equipment-item svg {
+      width: 18px; height: 18px;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
     }
     .focus-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
     .focus-btn {
@@ -641,6 +643,31 @@
       stroke-linecap: round; stroke-linejoin: round;
       fill: none;
     }
+    .equipment-manager {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .equipment-manager-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      background: white;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.8rem;
+      color: var(--sage-700);
+    }
+    .equipment-manager-item:hover { border-color: var(--sage-400); }
+    .equipment-manager-item.disabled {
+      opacity: 0.4;
+      background: var(--sage-50);
+    }
+    .equipment-manager-item svg {
+      width: 18px; height: 18px;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
+    }
   </style>
 </head>
 <body>
@@ -648,7 +675,7 @@
     <div id="mainView">
       <header class="header">
         <div class="header-top">
-          <div class="logo">Mise <span>en Place</span></div>
+          <div class="logo">Mise en Place</div>
           <div class="header-actions">
             <button class="icon-btn" onclick="enterFocusMode()" title="Focus Mode">
               <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
@@ -722,13 +749,7 @@
           </div>
         </div>
         <div class="task-list" id="zoneTasks"></div>
-        <div class="streak-banner">
-          <div class="streak-icon">✨</div>
-          <div class="streak-content">
-            <div class="streak-label">Current Streak</div>
-            <div class="streak-value" id="streakValue">0 days</div>
-          </div>
-        </div>
+
         <div class="affirmation" id="affirmation">Progress, not perfection. You're doing great.</div>
       </main>
       <nav class="bottom-nav">
@@ -754,7 +775,7 @@
     <!-- Focus Mode -->
     <div class="focus-overlay" id="focusOverlay">
       <div class="focus-header">
-        <div class="logo">Mise <span>en Place</span></div>
+        <div class="logo">Mise en Place</div>
         <button class="focus-close" onclick="exitFocusMode()">
           <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -770,6 +791,7 @@
           </div>
           <div class="focus-task-label">Current Task</div>
           <div class="focus-task-text" id="focusTaskText">Loading...</div>
+          <div class="focus-equipment" id="focusEquipment"></div>
           <div class="focus-actions">
             <button class="focus-btn focus-btn-primary" onclick="completeFocusTask()">Done ✓</button>
             <button class="focus-btn focus-btn-skip" onclick="skipFocusTask()">Skip for now</button>
@@ -802,6 +824,11 @@
           <div class="settings-group">
             <label class="settings-label">Zones Rotation</label>
             <div class="zone-list" id="zoneListSettings"></div>
+          </div>
+          <div class="settings-group">
+            <label class="settings-label">Equipment Icons</label>
+            <p style="font-size: 0.75rem; color: var(--warm-gray); margin-bottom: 12px;">Tap to enable/disable equipment options when editing tasks.</p>
+            <div class="equipment-manager" id="equipmentManager"></div>
           </div>
           <button class="btn btn-secondary" onclick="resetAllData()" style="margin-top: 16px;">Reset All Data</button>
         </div>
@@ -1011,7 +1038,8 @@
       lastActiveDate: null, dailyLog: {}, energyLevel: 2,
       filterVisible: true, filterActive: true,
       calendarMonth: new Date().getMonth(), calendarYear: new Date().getFullYear(),
-      selectedDate: null, focusTasks: [], focusIndex: 0
+      selectedDate: null, focusTasks: [], focusIndex: 0,
+      enabledEquipment: Object.keys(EQUIPMENT)
     };
 
     function init() {
@@ -1026,6 +1054,8 @@
       if (saved) {
         const p = JSON.parse(saved);
         state = { ...state, ...p };
+        // Ensure enabledEquipment exists for older saved states
+        if (!state.enabledEquipment) state.enabledEquipment = Object.keys(EQUIPMENT);
         state.timerSeconds = state.timerMinutes * 60;
         state.timerRunning = false;
       } else {
@@ -1265,14 +1295,14 @@
       state.dailyTasks.forEach(t => {
         const comp = log.daily && log.daily[t.id];
         if (!comp && shouldShowTask(t.effort, false)) {
-          state.focusTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort });
+          state.focusTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
         }
       });
       z.tasks.forEach((t, i) => {
         const id = `z${state.currentZoneIndex}_${i}`;
         const comp = log.zone && log.zone[id];
         if (!comp && shouldShowTask(t.effort, false)) {
-          state.focusTasks.push({ type: 'zone', id, text: t.text, effort: t.effort });
+          state.focusTasks.push({ type: 'zone', id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
         }
       });
       
@@ -1303,6 +1333,17 @@
       }
       const task = state.focusTasks[state.focusIndex];
       document.getElementById('focusTaskText').textContent = task.text;
+      
+      // Show equipment with names
+      const equipContainer = document.getElementById('focusEquipment');
+      if (task.equipment && task.equipment.length > 0) {
+        equipContainer.innerHTML = task.equipment
+          .filter(e => EQUIPMENT[e])
+          .map(e => `<div class="focus-equipment-item">${EQUIPMENT[e].icon}<span>${EQUIPMENT[e].name}</span></div>`)
+          .join('');
+      } else {
+        equipContainer.innerHTML = '';
+      }
     }
 
     function completeFocusTask() {
@@ -1327,8 +1368,31 @@
     // Modals
     function openSettings() {
       renderZoneListSettings();
+      renderEquipmentManager();
       document.querySelectorAll('.timer-preset').forEach(b => b.classList.toggle('active', parseInt(b.dataset.minutes) === state.timerMinutes));
       document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function renderEquipmentManager() {
+      const container = document.getElementById('equipmentManager');
+      container.innerHTML = Object.entries(EQUIPMENT).map(([key, eq]) => {
+        const enabled = state.enabledEquipment.includes(key);
+        return `<div class="equipment-manager-item ${enabled ? '' : 'disabled'}" onclick="toggleEquipmentEnabled('${key}')">
+          ${eq.icon}
+          <span>${eq.name}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function toggleEquipmentEnabled(key) {
+      const idx = state.enabledEquipment.indexOf(key);
+      if (idx > -1) {
+        state.enabledEquipment.splice(idx, 1);
+      } else {
+        state.enabledEquipment.push(key);
+      }
+      saveState();
+      renderEquipmentManager();
     }
 
     function renderZoneListSettings() {
@@ -1453,8 +1517,10 @@
 
     function renderEquipmentSelector(selectedEquipment, taskIndex, type) {
       const selected = selectedEquipment || [];
+      const enabledItems = Object.entries(EQUIPMENT).filter(([key]) => state.enabledEquipment.includes(key));
+      if (enabledItems.length === 0) return '';
       return `<div class="equipment-selector" data-task="${taskIndex}" data-type="${type}">
-        ${Object.entries(EQUIPMENT).map(([key, eq]) => `
+        ${enabledItems.map(([key, eq]) => `
           <button type="button" class="equipment-toggle ${selected.includes(key) ? 'selected' : ''}" 
                   data-equipment="${key}" 
                   title="${eq.name}"
