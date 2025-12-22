@@ -498,6 +498,38 @@
       align-items: center; justify-content: center;
       padding: 24px; text-align: center;
     }
+    .focus-chime-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: var(--sage-400);
+      cursor: pointer;
+      margin: 0 auto 24px;
+      transition: all 0.2s ease;
+    }
+    .focus-chime-toggle:hover {
+      color: var(--sage-600);
+    }
+    .focus-chime-toggle .icon {
+      width: 20px;
+      height: 20px;
+    }
+    .focus-chime-toggle .chime-off {
+      display: none;
+    }
+    .focus-chime-toggle.muted .chime-on {
+      display: none;
+    }
+    .focus-chime-toggle.muted .chime-off {
+      display: block;
+    }
+    .focus-chime-toggle.muted {
+      color: var(--sage-300);
+    }
     .focus-timer {
       position: relative; width: 200px; height: 200px;
       margin: 0 auto 48px;
@@ -627,6 +659,111 @@
       color: white;
     }
     .timer-preset:hover:not(.active) { border-color: var(--sage-400); }
+    .chime-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--sage-200);
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--sage-500);
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+    .toggle-label {
+      font-size: 0.85rem;
+      color: var(--sage-700);
+    }
+    .chime-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chime-options.hidden { display: none; }
+    .chime-setting {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .chime-setting-label {
+      font-size: 0.75rem;
+      color: var(--warm-gray);
+    }
+    .chime-sound-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chime-sound-btn {
+      padding: 6px 12px;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      background: white;
+      font-size: 0.75rem;
+      color: var(--sage-600);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chime-sound-btn:hover { border-color: var(--sage-400); }
+    .chime-sound-btn.active {
+      background: var(--sage-100);
+      border-color: var(--sage-500);
+      color: var(--sage-700);
+    }
+    .chime-interval-options {
+      display: flex;
+      gap: 6px;
+    }
+    .chime-interval-btn {
+      padding: 6px 12px;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      background: white;
+      font-size: 0.75rem;
+      color: var(--sage-600);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chime-interval-btn:hover { border-color: var(--sage-400); }
+    .chime-interval-btn.active {
+      background: var(--sage-100);
+      border-color: var(--sage-500);
+      color: var(--sage-700);
+    }
     .zone-list { display: flex; flex-direction: column; gap: 8px; }
     .zone-item {
       display: flex; align-items: center; gap: 12px;
@@ -1126,6 +1263,10 @@
       </div>
       <div class="focus-content">
         <div id="focusActiveContent">
+          <button class="focus-chime-toggle" id="focusChimeToggle" onclick="toggleFocusChime()" title="Toggle chime">
+            <svg class="icon chime-on" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <svg class="icon chime-off" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
           <div class="focus-timer">
             <svg viewBox="0 0 200 200">
               <circle class="focus-timer-bg" cx="100" cy="100" r="90"/>
@@ -1163,6 +1304,30 @@
               <button class="timer-preset" data-minutes="10" onclick="setTimerPreset(10)">10 min</button>
               <button class="timer-preset active" data-minutes="20" onclick="setTimerPreset(20)">20 min</button>
               <button class="timer-preset" data-minutes="30" onclick="setTimerPreset(30)">30 min</button>
+            </div>
+          </div>
+          <div class="settings-group">
+            <label class="settings-label">Mindfulness Chime</label>
+            <div class="chime-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" id="chimeToggle" onchange="toggleChime(this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">Play gentle chime during timer</span>
+            </div>
+            <div class="chime-options" id="chimeOptions">
+              <div class="chime-setting">
+                <span class="chime-setting-label">Sound</span>
+                <div class="chime-sound-options" id="chimeSoundOptions"></div>
+              </div>
+              <div class="chime-setting">
+                <span class="chime-setting-label">Every</span>
+                <div class="chime-interval-options">
+                  <button class="chime-interval-btn" data-interval="1" onclick="setChimeInterval(1)">1 min</button>
+                  <button class="chime-interval-btn" data-interval="5" onclick="setChimeInterval(5)">5 min</button>
+                  <button class="chime-interval-btn" data-interval="10" onclick="setChimeInterval(10)">10 min</button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="settings-group">
@@ -1452,6 +1617,94 @@
       "You deserve a peaceful space."
     ];
 
+    // Audio context for chime sounds
+    let audioContext = null;
+    
+    function getAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioContext;
+    }
+
+    const CHIME_SOUNDS = {
+      bowl: { name: 'Singing Bowl', freq: 220, type: 'sine', decay: 3 },
+      bell: { name: 'Soft Bell', freq: 440, type: 'sine', decay: 2 },
+      chime: { name: 'Wind Chime', freq: 880, type: 'triangle', decay: 1.5 },
+      gong: { name: 'Gentle Gong', freq: 110, type: 'sine', decay: 4 },
+      tone: { name: 'Pure Tone', freq: 528, type: 'sine', decay: 2.5 }
+    };
+
+    function playChime(soundKey) {
+      try {
+        const ctx = getAudioContext();
+        const sound = CHIME_SOUNDS[soundKey] || CHIME_SOUNDS.bowl;
+        
+        if (soundKey === 'chime') {
+          // Wind chime - multiple overlapping tones at different times
+          const chimeFreqs = [1200, 1400, 1000, 1600, 1100];
+          const delays = [0, 0.1, 0.2, 0.35, 0.5];
+          
+          chimeFreqs.forEach((freq, i) => {
+            setTimeout(() => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              
+              osc.type = 'sine';
+              // Slight randomness in frequency for natural feel
+              osc.frequency.setValueAtTime(freq * (0.98 + Math.random() * 0.04), ctx.currentTime);
+              
+              gain.gain.setValueAtTime(0.15, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+              
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              
+              osc.start(ctx.currentTime);
+              osc.stop(ctx.currentTime + 1.5);
+            }, delays[i] * 1000);
+          });
+          return;
+        }
+        
+        // Create oscillator
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = sound.type;
+        osc.frequency.setValueAtTime(sound.freq, ctx.currentTime);
+        
+        // Add slight frequency variation for richness
+        osc.frequency.exponentialRampToValueAtTime(sound.freq * 0.98, ctx.currentTime + sound.decay);
+        
+        // Create envelope
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + sound.decay);
+        
+        // Add harmonics for singing bowl effect
+        if (soundKey === 'bowl' || soundKey === 'gong') {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(sound.freq * 2.5, ctx.currentTime);
+          gain2.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + sound.decay * 0.7);
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.start(ctx.currentTime);
+          osc2.stop(ctx.currentTime + sound.decay);
+        }
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + sound.decay);
+      } catch(e) {
+        console.log('Audio not supported');
+      }
+    }
+
     let state = {
       zones: [], dailyTasks: [], currentZoneIndex: 0,
       weekStartDate: null, timerMinutes: 20, timerSeconds: 0,
@@ -1462,7 +1715,10 @@
       selectedDate: null, focusTasks: [], focusIndex: 0,
       enabledEquipment: ['spray', 'cloth', 'broom', 'mop', 'vacuum', 'bucket', 'sponge', 'gloves', 'duster', 'iron', 'brush', 'squeegee', 'bin', 'laundry', 'stool', 'wipes', 'paper'],
       weekChangePending: false,
-      equipmentFilter: []
+      equipmentFilter: [],
+      chimeEnabled: true,
+      chimeSound: 'bowl',
+      chimeInterval: 5
     };
 
     function init() {
@@ -1799,6 +2055,13 @@
       state.timerInterval = setInterval(() => {
         state.timerSeconds--;
         updateTimerDisplay();
+        // Check for chime
+        if (state.chimeEnabled && state.timerSeconds > 0) {
+          const elapsed = (state.timerMinutes * 60) - state.timerSeconds;
+          if (elapsed > 0 && elapsed % (state.chimeInterval * 60) === 0) {
+            playChime(state.chimeSound);
+          }
+        }
         if (state.timerSeconds <= 0) timerDone();
       }, 1000);
     }
@@ -1878,6 +2141,7 @@
       document.getElementById('focusActiveContent').style.display = 'block';
       document.getElementById('focusCompleteMsg').classList.remove('show');
       updateFocusTask();
+      updateFocusChimeToggle();
       
       if (!state.timerRunning) {
         if (state.timerSeconds === 0) state.timerSeconds = state.timerMinutes * 60;
@@ -1916,6 +2180,7 @@
       document.getElementById('focusActiveContent').style.display = 'block';
       document.getElementById('focusCompleteMsg').classList.remove('show');
       updateFocusTask();
+      updateFocusChimeToggle();
       
       // Start timer if not already running
       if (!state.timerRunning) {
@@ -1982,8 +2247,64 @@
     function openSettings() {
       renderZoneListSettings();
       renderEquipmentManager();
+      renderChimeSettings();
       document.querySelectorAll('.timer-preset').forEach(b => b.classList.toggle('active', parseInt(b.dataset.minutes) === state.timerMinutes));
       document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function renderChimeSettings() {
+      // Toggle
+      document.getElementById('chimeToggle').checked = state.chimeEnabled;
+      
+      // Show/hide options
+      const options = document.getElementById('chimeOptions');
+      options.classList.toggle('hidden', !state.chimeEnabled);
+      
+      // Sound options
+      const soundContainer = document.getElementById('chimeSoundOptions');
+      soundContainer.innerHTML = Object.entries(CHIME_SOUNDS).map(([key, sound]) => `
+        <button class="chime-sound-btn ${state.chimeSound === key ? 'active' : ''}" 
+                onclick="setChimeSound('${key}')">${sound.name}</button>
+      `).join('');
+      
+      // Interval options
+      document.querySelectorAll('.chime-interval-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.interval) === state.chimeInterval);
+      });
+    }
+
+    function toggleChime(enabled) {
+      state.chimeEnabled = enabled;
+      saveState();
+      renderChimeSettings();
+    }
+
+    function setChimeSound(soundKey) {
+      state.chimeSound = soundKey;
+      saveState();
+      renderChimeSettings();
+      // Play preview
+      playChime(soundKey);
+    }
+
+    function setChimeInterval(minutes) {
+      state.chimeInterval = minutes;
+      saveState();
+      renderChimeSettings();
+    }
+
+    function toggleFocusChime() {
+      state.chimeEnabled = !state.chimeEnabled;
+      saveState();
+      updateFocusChimeToggle();
+    }
+
+    function updateFocusChimeToggle() {
+      const btn = document.getElementById('focusChimeToggle');
+      if (btn) {
+        btn.classList.toggle('muted', !state.chimeEnabled);
+        btn.title = state.chimeEnabled ? 'Sound on - tap to mute' : 'Sound off - tap to unmute';
+      }
     }
 
     function renderEquipmentManager() {
