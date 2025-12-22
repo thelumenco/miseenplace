@@ -157,7 +157,7 @@
     }
     .header-actions { display: flex; gap: 8px; }
     .icon-btn {
-      width: 40px; height: 40px;
+      width: 34px; height: 34px;
       border-radius: 50%;
       border: none;
       background: var(--cream);
@@ -169,20 +169,20 @@
       box-shadow: var(--shadow-soft);
       transition: all 0.2s ease;
     }
+    .icon-btn .icon { width: 18px; height: 18px; }
     .icon-btn:hover { transform: scale(1.05); box-shadow: var(--shadow-lifted); }
     .icon-btn.active { background: var(--sage-500); color: white; }
     .energy-selector {
-      display: flex; gap: 8px; margin-bottom: 16px;
-      align-items: center;
+      display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;
     }
     .energy-buttons {
-      flex: 1; display: flex; gap: 8px;
+      display: flex; gap: 8px;
       padding: 4px; background: white;
       border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
       transition: all 0.3s ease;
     }
     .energy-buttons.hidden {
-      opacity: 0; max-height: 0; overflow: hidden;
+      display: none;
       padding: 0; margin: -16px 0 0 0;
     }
     .energy-btn {
@@ -208,9 +208,10 @@
     }
     .energy-btn.active { background: var(--sage-100); color: var(--sage-700); }
     .equipment-filter {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--sage-100);
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      box-shadow: var(--shadow-soft);
     }
     .equipment-filter.hidden { display: none; }
     .equipment-filter-label {
@@ -1419,7 +1420,7 @@
       bin: { name: 'Trash bag', icon: '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/></svg>' },
       laundry: { name: 'Laundry basket', icon: '<svg viewBox="0 0 24 24"><path d="M4 6l2 14h12l2-14"/><path d="M2 6h20"/><path d="M8 6V4"/><path d="M16 6V4"/><path d="M9 11c1 2 5 2 6 0"/></svg>' },
       stool: { name: 'Step stool', icon: '<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="4" rx="1"/><path d="M7 8v12"/><path d="M17 8v12"/><path d="M7 14h10"/></svg>' },
-      wipes: { name: 'Wet wipes', icon: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8c-2 2-2 4 0 6s2 4 0 6"/><circle cx="12" cy="12" r="2"/></svg>' },
+      wipes: { name: 'Wet wipes', icon: '<svg viewBox="0 0 24 24"><path d="M12 2c-4 4-6 8-6 12a6 6 0 0 0 12 0c0-4-2-8-6-12z"/></svg>' },
       paper: { name: 'Paper towels', icon: '<svg viewBox="0 0 24 24"><path d="M12 3c-4 0-7 1-7 3v12c0 2 3 3 7 3s7-1 7-3V6c0-2-3-3-7-3z"/><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 12c0 2 3 3 7 3s7-1 7-3"/></svg>' }
     };
 
