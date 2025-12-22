@@ -207,6 +207,58 @@
       fill: currentColor;
     }
     .energy-btn.active { background: var(--sage-100); color: var(--sage-700); }
+    .equipment-filter {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--sage-100);
+    }
+    .equipment-filter.hidden { display: none; }
+    .equipment-filter-label {
+      font-size: 0.75rem;
+      color: var(--warm-gray);
+      margin-bottom: 8px;
+    }
+    .equipment-filter-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .equipment-filter-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: white;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.7rem;
+      color: var(--sage-600);
+    }
+    .equipment-filter-item:hover { border-color: var(--sage-400); }
+    .equipment-filter-item.selected {
+      background: var(--sage-100);
+      border-color: var(--sage-500);
+      color: var(--sage-700);
+    }
+    .equipment-filter-item svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
+    }
+    .equipment-filter-clear {
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: var(--sage-500);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .equipment-filter-clear:hover { color: var(--sage-700); }
     .energy-btn[data-energy="1"].active { background: var(--energy-low); }
     .energy-btn[data-energy="2"].active { background: var(--energy-med); }
     .energy-btn[data-energy="3"].active { background: var(--energy-high); }
@@ -973,6 +1025,11 @@
               <span class="energy-bars"><svg viewBox="0 0 24 20"><rect x="4" y="2" width="16" height="4" rx="2"/><rect x="4" y="8" width="16" height="4" rx="2"/><rect x="4" y="14" width="16" height="4" rx="2"/></svg></span>High
             </button>
           </div>
+          <div class="equipment-filter hidden" id="equipmentFilter">
+            <div class="equipment-filter-label">Filter by equipment:</div>
+            <div class="equipment-filter-list" id="equipmentFilterList"></div>
+            <button class="equipment-filter-clear" onclick="clearEquipmentFilter()">Clear equipment filter</button>
+          </div>
         </div>
       </header>
       <div class="timer-float">
@@ -1403,7 +1460,8 @@
       calendarMonth: new Date().getMonth(), calendarYear: new Date().getFullYear(),
       selectedDate: null, focusTasks: [], focusIndex: 0,
       enabledEquipment: ['spray', 'cloth', 'broom', 'mop', 'vacuum', 'bucket', 'sponge', 'gloves', 'duster', 'iron', 'brush', 'squeegee', 'bin', 'laundry', 'stool', 'wipes', 'paper'],
-      weekChangePending: false
+      weekChangePending: false,
+      equipmentFilter: []
     };
 
     function init() {
@@ -1529,8 +1587,46 @@
     function updateFilterUI() {
       const toggle = document.getElementById('filterToggle');
       const buttons = document.getElementById('energyButtons');
+      const equipFilter = document.getElementById('equipmentFilter');
       toggle.classList.toggle('active', state.filterActive);
       buttons.classList.toggle('hidden', !state.filterActive);
+      equipFilter.classList.toggle('hidden', !state.filterActive);
+      if (state.filterActive) {
+        renderEquipmentFilterList();
+      }
+    }
+
+    function renderEquipmentFilterList() {
+      const container = document.getElementById('equipmentFilterList');
+      const enabledItems = Object.entries(EQUIPMENT).filter(([key]) => state.enabledEquipment.includes(key));
+      container.innerHTML = enabledItems.map(([key, eq]) => `
+        <div class="equipment-filter-item ${state.equipmentFilter.includes(key) ? 'selected' : ''}" 
+             onclick="toggleEquipmentFilter('${key}')">
+          ${eq.icon}
+          <span>${eq.name}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleEquipmentFilter(key) {
+      const idx = state.equipmentFilter.indexOf(key);
+      if (idx > -1) {
+        state.equipmentFilter.splice(idx, 1);
+      } else {
+        state.equipmentFilter.push(key);
+      }
+      saveState();
+      renderEquipmentFilterList();
+      renderDailyTasks();
+      renderZoneTasks();
+    }
+
+    function clearEquipmentFilter() {
+      state.equipmentFilter = [];
+      saveState();
+      renderEquipmentFilterList();
+      renderDailyTasks();
+      renderZoneTasks();
     }
 
     function updateEnergyUI() {
@@ -1539,13 +1635,28 @@
       });
     }
 
-    function shouldShowTask(taskEffort, isCompleted) {
+    function shouldShowTask(taskEffort, isCompleted, taskEquipment) {
       // If filter is off, show all tasks
       if (!state.filterActive) return true;
       // Completed tasks always show
       if (isCompleted) return true;
-      // Filter: show tasks at or below current energy level
-      return taskEffort <= state.energyLevel;
+      
+      // Check energy level
+      const energyMatch = taskEffort <= state.energyLevel;
+      
+      // Check equipment filter
+      let equipmentMatch = true;
+      if (state.equipmentFilter && state.equipmentFilter.length > 0) {
+        // Task matches if it has no equipment OR has at least one of the selected equipment
+        const taskEquip = taskEquipment || [];
+        if (taskEquip.length === 0) {
+          equipmentMatch = true; // Tasks with no equipment always match
+        } else {
+          equipmentMatch = state.equipmentFilter.some(eq => taskEquip.includes(eq));
+        }
+      }
+      
+      return energyMatch && equipmentMatch;
     }
 
     function renderEquipmentIcons(equipment) {
@@ -1570,7 +1681,7 @@
       let vis = 0, done = 0;
       c.innerHTML = state.dailyTasks.map((t, idx) => {
         const comp = log.daily && log.daily[t.id];
-        const show = shouldShowTask(t.effort, comp);
+        const show = shouldShowTask(t.effort, comp, t.equipment);
         if (show) vis++;
         if (comp) done++;
         return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="openTaskFocus('daily', ${idx})">
@@ -1593,7 +1704,7 @@
       c.innerHTML = z.tasks.map((t, i) => {
         const id = `z${state.currentZoneIndex}_${i}`;
         const comp = log.zone && log.zone[id];
-        const show = shouldShowTask(t.effort, comp);
+        const show = shouldShowTask(t.effort, comp, t.equipment);
         if (show) vis++;
         if (comp) done++;
         return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="openTaskFocus('zone', ${i})">
@@ -1725,38 +1836,41 @@
       const z = state.zones[state.currentZoneIndex];
       state.focusTasks = [];
       
-      // Get the tapped task
-      let tappedTask;
-      let tappedId;
-      if (type === 'daily') {
-        const task = state.dailyTasks[index];
-        tappedId = task.id;
-        if (log.daily && log.daily[tappedId]) return; // Already completed
-        tappedTask = { type: 'daily', id: tappedId, text: task.text, effort: task.effort, equipment: task.equipment || [] };
-      } else {
-        const task = z.tasks[index];
-        tappedId = `z${state.currentZoneIndex}_${index}`;
-        if (log.zone && log.zone[tappedId]) return; // Already completed
-        tappedTask = { type: 'zone', id: tappedId, text: task.text, effort: task.effort, equipment: task.equipment || [] };
-      }
+      // Build list starting from the tapped task, then continue with remaining tasks in order
+      // First, gather all uncompleted tasks in order
+      let allTasks = [];
       
-      // Add the tapped task first
-      state.focusTasks.push(tappedTask);
-      
-      // Then add all other uncompleted tasks that pass the filter
-      state.dailyTasks.forEach(t => {
+      state.dailyTasks.forEach((t, idx) => {
         const comp = log.daily && log.daily[t.id];
-        if (!comp && shouldShowTask(t.effort, false) && t.id !== tappedId) {
-          state.focusTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
+        if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
+          allTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [], originalIndex: idx });
         }
       });
-      z.tasks.forEach((t, i) => {
-        const id = `z${state.currentZoneIndex}_${i}`;
+      
+      z.tasks.forEach((t, idx) => {
+        const id = `z${state.currentZoneIndex}_${idx}`;
         const comp = log.zone && log.zone[id];
-        if (!comp && shouldShowTask(t.effort, false) && id !== tappedId) {
-          state.focusTasks.push({ type: 'zone', id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
+        if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
+          allTasks.push({ type: 'zone', id, text: t.text, effort: t.effort, equipment: t.equipment || [], originalIndex: idx });
         }
       });
+      
+      // Find the index of the tapped task in our allTasks array
+      let tappedTaskIndex = allTasks.findIndex(t => {
+        if (type === 'daily') {
+          return t.type === 'daily' && t.originalIndex === index;
+        } else {
+          return t.type === 'zone' && t.originalIndex === index;
+        }
+      });
+      
+      if (tappedTaskIndex === -1) return; // Task already completed
+      
+      // Reorder: tapped task first, then tasks after it, then tasks before it
+      state.focusTasks = [
+        ...allTasks.slice(tappedTaskIndex),
+        ...allTasks.slice(0, tappedTaskIndex)
+      ];
       
       state.focusIndex = 0;
       document.getElementById('focusOverlay').classList.add('active');
@@ -1778,14 +1892,14 @@
       // Gather uncompleted tasks that pass the current filter
       state.dailyTasks.forEach(t => {
         const comp = log.daily && log.daily[t.id];
-        if (!comp && shouldShowTask(t.effort, false)) {
+        if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
           state.focusTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
         }
       });
       z.tasks.forEach((t, i) => {
         const id = `z${state.currentZoneIndex}_${i}`;
         const comp = log.zone && log.zone[id];
-        if (!comp && shouldShowTask(t.effort, false)) {
+        if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
           state.focusTasks.push({ type: 'zone', id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
         }
       });
@@ -1835,16 +1949,27 @@
       const t = state.focusTasks[state.focusIndex];
       if (t.type === 'daily') toggleDaily(t.id);
       else toggleZone(t.id);
-      // Remove the completed task from focus list
-      state.focusTasks.splice(state.focusIndex, 1);
-      updateFocusTask();
+      // Move to next task
+      state.focusIndex++;
+      if (state.focusIndex >= state.focusTasks.length) {
+        // Reached end, show completion
+        document.getElementById('focusActiveContent').style.display = 'none';
+        document.getElementById('focusCompleteMsg').classList.add('show');
+      } else {
+        updateFocusTask();
+      }
     }
 
     function skipFocusTask() {
-      // Remove the skipped task from the focus list and move to next
-      state.focusTasks.splice(state.focusIndex, 1);
-      // Don't increment index since we removed the current one
-      updateFocusTask();
+      // Move to next task without removing current one
+      state.focusIndex++;
+      if (state.focusIndex >= state.focusTasks.length) {
+        // Reached end, show completion
+        document.getElementById('focusActiveContent').style.display = 'none';
+        document.getElementById('focusCompleteMsg').classList.add('show');
+      } else {
+        updateFocusTask();
+      }
     }
 
     function exitFocusMode() {
