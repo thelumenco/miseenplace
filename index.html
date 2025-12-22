@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Mise en Place</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b8a54' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2c-4 4-6 8-6 12 0 3.31 2.69 6 6 6s6-2.69 6-6c0-4-2-8-6-12z'/%3E%3Cpath d='M12 8v14'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239FA6A2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2c-4 4-6 8-6 12 0 3.31 2.69 6 6 6s6-2.69 6-6c0-4-2-8-6-12z'/%3E%3Cpath d='M12 8v14'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
       transform: translate(-50%, -50%);
       width: 40px;
       height: 40px;
-      color: #6b8a54;
+      color: #9FA6A2;
     }
     .loading-leaf svg {
       width: 100%;
@@ -56,8 +56,8 @@
       left: 0;
       width: 80px;
       height: 80px;
-      border: 3px solid #d4dbc9;
-      border-top-color: #6b8a54;
+      border: 3px solid #d4d8d6;
+      border-top-color: #9FA6A2;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -68,25 +68,25 @@
       margin-top: 20px;
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.25rem;
-      color: #6b8a54;
+      color: #9FA6A2;
     }
     :root {
-      --sage-50: #f6f7f4;
-      --sage-100: #e8ebe3;
-      --sage-200: #d4dbc9;
-      --sage-300: #b5c4a3;
-      --sage-400: #8fa876;
-      --sage-500: #6b8a54;
-      --sage-600: #557043;
-      --sage-700: #445837;
-      --sage-800: #38472e;
-      --sage-900: #2f3b28;
-      --cream: #fdfcf9;
+      --sage-50: #f5f6f5;
+      --sage-100: #e8eae9;
+      --sage-200: #d4d8d6;
+      --sage-300: #bcc2bf;
+      --sage-400: #9fa6a2;
+      --sage-500: #7d857f;
+      --sage-600: #636a65;
+      --sage-700: #4d524e;
+      --sage-800: #3a3e3b;
+      --sage-900: #2a2d2b;
+      --cream: #fdfcfb;
       --warm-gray: #847e77;
       --charcoal: #3a3632;
       --success: #7dad5e;
       --skip: #c9a87c;
-      --energy-low: #d4dbc9;
+      --energy-low: #d4d8d6;
       --energy-med: #f0e6a3;
       --energy-high: #c9dbe8;
       --font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -1834,21 +1834,22 @@
     }
 
     function toggleEnergyFilter() {
-      state.filterActive = !state.filterActive;
+      state.filterVisible = !state.filterVisible;
       saveState();
       updateFilterUI();
-      renderDailyTasks();
-      renderZoneTasks();
     }
 
     function updateFilterUI() {
       const toggle = document.getElementById('filterToggle');
       const buttons = document.getElementById('energyButtons');
       const equipFilter = document.getElementById('equipmentFilter');
-      toggle.classList.toggle('active', state.filterActive);
-      buttons.classList.toggle('hidden', !state.filterActive);
-      equipFilter.classList.toggle('hidden', !state.filterActive);
-      if (state.filterActive) {
+      // Button is active if any filter is applied
+      const hasActiveFilter = state.filterActive || (state.equipmentFilter && state.equipmentFilter.length > 0);
+      toggle.classList.toggle('active', hasActiveFilter);
+      // Show/hide based on visibility state
+      buttons.classList.toggle('hidden', !state.filterVisible);
+      equipFilter.classList.toggle('hidden', !state.filterVisible);
+      if (state.filterVisible) {
         renderEquipmentFilterList();
       }
     }
@@ -1893,13 +1894,11 @@
     }
 
     function shouldShowTask(taskEffort, isCompleted, taskEquipment) {
-      // If filter is off, show all tasks
-      if (!state.filterActive) return true;
       // Completed tasks always show
       if (isCompleted) return true;
       
-      // Check energy level
-      const energyMatch = taskEffort <= state.energyLevel;
+      // Check energy level filter (always apply if set below max)
+      const energyMatch = state.energyLevel >= 3 || taskEffort <= state.energyLevel;
       
       // Check equipment filter
       let equipmentMatch = true;
@@ -2858,7 +2857,7 @@
       container.className = 'confetti-container';
       document.body.appendChild(container);
       
-      const colors = ['#6b8a54', '#8fa876', '#b5c4a3', '#d4dbc9', '#f0e6a3', '#c9dbe8'];
+      const colors = ['#9FA6A2', '#7d857f', '#bcc2bf', '#d4d8d6', '#f0e6a3', '#c9dbe8'];
       
       for (let i = 0; i < 30; i++) {
         const confetti = document.createElement('div');
