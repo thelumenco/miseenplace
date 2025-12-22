@@ -24,9 +24,9 @@
       --charcoal: #3a3632;
       --success: #7dad5e;
       --skip: #c9a87c;
-      --energy-low: #e8d5b7;
-      --energy-med: #d4dbc9;
-      --energy-high: #b5c4a3;
+      --energy-low: #d4dbc9;
+      --energy-med: #f0e6a3;
+      --energy-high: #c9dbe8;
       --font-serif: 'Cormorant Garamond', Georgia, serif;
       --font-sans: 'DM Sans', -apple-system, sans-serif;
       --radius-sm: 8px;
@@ -74,6 +74,24 @@
       font-weight: 500;
       color: var(--sage-700);
       letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-leaf {
+      width: 24px;
+      height: 24px;
+      color: var(--sage-400);
+      margin-top: -14px;
+    }
+    .logo-leaf svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
     }
     .header-actions { display: flex; gap: 8px; }
     .icon-btn {
@@ -114,7 +132,18 @@
       display: flex; flex-direction: column;
       align-items: center; gap: 4px;
     }
-    .energy-btn span { font-size: 1.25rem; }
+    .energy-btn .energy-bars { 
+      width: 24px; 
+      height: 20px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .energy-btn .energy-bars svg {
+      width: 24px;
+      height: 20px;
+      fill: currentColor;
+    }
     .energy-btn.active { background: var(--sage-100); color: var(--sage-700); }
     .energy-btn[data-energy="1"].active { background: var(--energy-low); }
     .energy-btn[data-energy="2"].active { background: var(--energy-med); }
@@ -171,9 +200,9 @@
     }
     .timer-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
     .timer-ring svg { transform: rotate(-90deg); width: 80px; height: 80px; }
-    .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.3); stroke-width: 4; }
+    .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.5); stroke-width: 4; }
     .timer-ring-progress {
-      fill: none; stroke: white; stroke-width: 4;
+      fill: none; stroke: var(--sage-700); stroke-width: 4;
       stroke-linecap: round; transition: stroke-dashoffset 0.5s ease;
     }
     .timer-display {
@@ -181,17 +210,17 @@
       transform: translate(-50%, -50%);
       font-family: var(--font-sans);
       font-size: 0.9rem; font-weight: 600;
-      color: white;
+      color: var(--sage-800);
     }
     .timer-info { flex: 1; }
     .timer-label {
-      font-size: 0.7rem; color: rgba(255,255,255,0.8);
+      font-size: 0.7rem; color: var(--sage-800);
       text-transform: uppercase; letter-spacing: 0.05em;
     }
     .timer-status {
       font-family: var(--font-serif);
       font-size: 1.25rem;
-      color: white;
+      color: var(--sage-900);
       font-weight: 600;
     }
     .timer-controls { display: flex; gap: 8px; }
@@ -206,6 +235,9 @@
     .timer-btn-secondary { background: rgba(255,255,255,0.7); color: var(--sage-700); }
     .timer-btn-secondary:hover { background: white; }
     .main-content { padding: 0 24px 120px; }
+    .main-content .zone-indicator {
+      margin: 24px 0 8px;
+    }
     .section-header {
       display: flex; justify-content: space-between;
       align-items: center; margin: 24px 0 12px;
@@ -244,7 +276,23 @@
       border: 2px solid var(--sage-300);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; transition: all 0.2s ease;
+      position: relative;
     }
+    .task-checkbox .time-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, calc(-50% - 4px));
+      width: 14px; height: 14px;
+      color: var(--sage-400);
+    }
+    .task-checkbox .time-icon svg {
+      width: 100%; height: 100%;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
+    }
+    .task-item.completed .task-checkbox .time-icon { display: none; }
     .task-item.completed .task-checkbox {
       background: var(--sage-400);
       border-color: var(--sage-400);
@@ -559,6 +607,35 @@
       text-align: center; max-width: 90%;
     }
     .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2000;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      opacity: 0;
+      animation: confetti-fall 2s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translateY(-10px) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(720deg);
+      }
+    }
     .bottom-nav {
       position: fixed; bottom: 0; left: 50%;
       transform: translateX(-50%);
@@ -583,7 +660,20 @@
       display: flex; align-items: center; gap: 8px;
       padding: 10px; background: white;
       border-radius: var(--radius-sm); margin-bottom: 6px;
+      transition: all 0.2s ease;
     }
+    .edit-task-item.dragging {
+      opacity: 0.5;
+      transform: scale(1.02);
+    }
+    .edit-task-drag {
+      color: var(--sage-300);
+      cursor: grab;
+      padding: 4px;
+      margin: -4px;
+      flex-shrink: 0;
+    }
+    .edit-task-drag:active { cursor: grabbing; }
     .edit-task-input {
       flex: 1; border: none;
       font-family: var(--font-sans); font-size: 0.9375rem;
@@ -668,6 +758,32 @@
       stroke-linecap: round; stroke-linejoin: round;
       fill: none;
     }
+    .time-selector {
+      display: flex; gap: 4px;
+    }
+    .time-btn {
+      width: 32px; height: 32px;
+      border: 1.5px solid var(--sage-200);
+      border-radius: var(--radius-sm);
+      background: white;
+      color: var(--sage-400);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+    }
+    .time-btn:hover { border-color: var(--sage-400); }
+    .time-btn.selected {
+      background: var(--sage-100);
+      border-color: var(--sage-500);
+      color: var(--sage-700);
+    }
+    .time-btn svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      fill: none;
+    }
   </style>
 </head>
 <body>
@@ -675,12 +791,12 @@
     <div id="mainView">
       <header class="header">
         <div class="header-top">
-          <div class="logo">Mise en Place</div>
+          <div class="logo">Mise en Place<span class="logo-leaf"><svg viewBox="0 0 24 24"><path d="M12 2c-4 4-6 8-6 12 0 3.31 2.69 6 6 6s6-2.69 6-6c0-4-2-8-6-12z"/><path d="M12 8v14"/></svg></span></div>
           <div class="header-actions">
             <button class="icon-btn" onclick="enterFocusMode()" title="Focus Mode">
               <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
-            <button class="icon-btn active" onclick="toggleEnergyFilter()" title="Toggle energy filter" id="filterToggle">
+            <button class="icon-btn" onclick="toggleEnergyFilter()" title="Toggle energy filter" id="filterToggle">
               <svg class="icon" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             </button>
             <button class="icon-btn" onclick="openSettings()" title="Settings">
@@ -689,18 +805,16 @@
           </div>
         </div>
         <div class="energy-selector" id="energySelector">
-          <div class="energy-buttons" id="energyButtons">
-            <button class="energy-btn" data-energy="1" onclick="setEnergy(1)"><span>🪫</span>Low</button>
-            <button class="energy-btn active" data-energy="2" onclick="setEnergy(2)"><span>⚡</span>Medium</button>
-            <button class="energy-btn" data-energy="3" onclick="setEnergy(3)"><span>🔥</span>High</button>
-          </div>
-        </div>
-        <div class="zone-indicator">
-          <div class="zone-label">Week <span id="weekNumber">1</span> • This Week's Zone</div>
-          <div class="zone-name" id="currentZoneName">Living Room</div>
-          <div class="zone-progress">
-            <div class="progress-bar"><div class="progress-fill" id="zoneProgress" style="width: 0%"></div></div>
-            <div class="progress-text" id="zoneProgressText">0%</div>
+          <div class="energy-buttons hidden" id="energyButtons">
+            <button class="energy-btn" data-energy="1" onclick="setEnergy(1)">
+              <span class="energy-bars"><svg viewBox="0 0 24 12"><rect x="4" y="4" width="16" height="4" rx="2"/></svg></span>Low
+            </button>
+            <button class="energy-btn active" data-energy="2" onclick="setEnergy(2)">
+              <span class="energy-bars"><svg viewBox="0 0 24 16"><rect x="4" y="2" width="16" height="4" rx="2"/><rect x="4" y="10" width="16" height="4" rx="2"/></svg></span>Medium
+            </button>
+            <button class="energy-btn" data-energy="3" onclick="setEnergy(3)">
+              <span class="energy-bars"><svg viewBox="0 0 24 20"><rect x="4" y="2" width="16" height="4" rx="2"/><rect x="4" y="8" width="16" height="4" rx="2"/><rect x="4" y="14" width="16" height="4" rx="2"/></svg></span>High
+            </button>
           </div>
         </div>
       </header>
@@ -739,6 +853,16 @@
           </div>
         </div>
         <div class="task-list" id="dailyTasks"></div>
+
+        <div class="zone-indicator">
+          <div class="zone-label">Week <span id="weekNumber">1</span> • This Week's Zone</div>
+          <div class="zone-name" id="currentZoneName">Living Room</div>
+          <div class="zone-progress">
+            <div class="progress-bar"><div class="progress-fill" id="zoneProgress" style="width: 0%"></div></div>
+            <div class="progress-text" id="zoneProgressText">0%</div>
+          </div>
+        </div>
+
         <div class="section-header">
           <h2 class="section-title">Zone Tasks</h2>
           <div class="section-actions">
@@ -775,7 +899,7 @@
     <!-- Focus Mode -->
     <div class="focus-overlay" id="focusOverlay">
       <div class="focus-header">
-        <div class="logo">Mise en Place</div>
+        <div class="logo">Mise en Place<span class="logo-leaf"><svg viewBox="0 0 24 24"><path d="M12 2c-4 4-6 8-6 12 0 3.31 2.69 6 6 6s6-2.69 6-6c0-4-2-8-6-12z"/><path d="M12 8v14"/></svg></span></div>
         <button class="focus-close" onclick="exitFocusMode()">
           <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -816,7 +940,7 @@
           <div class="settings-group">
             <label class="settings-label">Timer Duration</label>
             <div class="timer-presets">
-              <button class="timer-preset" data-minutes="15" onclick="setTimerPreset(15)">15 min</button>
+              <button class="timer-preset" data-minutes="10" onclick="setTimerPreset(10)">10 min</button>
               <button class="timer-preset active" data-minutes="20" onclick="setTimerPreset(20)">20 min</button>
               <button class="timer-preset" data-minutes="30" onclick="setTimerPreset(30)">30 min</button>
             </div>
@@ -830,7 +954,21 @@
             <p style="font-size: 0.75rem; color: var(--warm-gray); margin-bottom: 12px;">Tap to enable/disable equipment options when editing tasks.</p>
             <div class="equipment-manager" id="equipmentManager"></div>
           </div>
-          <button class="btn btn-secondary" onclick="resetAllData()" style="margin-top: 16px;">Reset All Data</button>
+          <div class="settings-group">
+            <label class="settings-label">Data Management</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+              <button class="btn btn-secondary" onclick="exportData()" style="flex: 1; padding: 12px;">
+                <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
+              </button>
+              <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="flex: 1; padding: 12px;">
+                <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import
+              </button>
+              <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="resetAllData()" style="margin-top: 8px;">Reset All Data</button>
         </div>
       </div>
     </div>
@@ -906,6 +1044,23 @@
             </button>
           </div>
           <button class="btn btn-primary" onclick="saveZoneEdits()" style="margin-top: 16px;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Zone Confirmation Modal -->
+    <div class="modal-overlay" id="deleteZoneConfirmModal">
+      <div class="modal" style="max-width: 320px;">
+        <div class="modal-header">
+          <h2 class="modal-title">Delete Zone?</h2>
+          <button class="modal-close" onclick="closeModal('deleteZoneConfirmModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <p style="color: var(--warm-gray); margin-bottom: 24px;">Are you sure you want to delete "<span id="deleteZoneName"></span>"? This action cannot be undone.</p>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" onclick="closeModal('deleteZoneConfirmModal')" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmDeleteZone()" style="flex: 1;">Delete</button>
+          </div>
         </div>
       </div>
     </div>
@@ -997,18 +1152,18 @@
       ]}
     ];
     const DEFAULT_DAILY = [
-      { id: 'd1', text: "Clear dining table", effort: 1, equipment: [] },
-      { id: 'd2', text: "Wipe dining table", effort: 1, equipment: ['spray', 'cloth'] },
-      { id: 'd3', text: "Wipe high chair", effort: 1, equipment: ['spray', 'cloth'] },
-      { id: 'd4', text: "Pick up toys", effort: 2, equipment: [] },
-      { id: 'd5', text: "Prep bag for next day", effort: 2, equipment: [] },
-      { id: 'd6', text: "Load laundry", effort: 1, equipment: ['laundry'] }
+      { id: 'd1', text: "Clear dining table", effort: 1, equipment: [], timeOfDay: null },
+      { id: 'd2', text: "Wipe dining table", effort: 1, equipment: ['spray', 'cloth'], timeOfDay: 'evening' },
+      { id: 'd3', text: "Wipe high chair", effort: 1, equipment: ['spray', 'cloth'], timeOfDay: 'evening' },
+      { id: 'd4', text: "Pick up toys", effort: 2, equipment: [], timeOfDay: 'evening' },
+      { id: 'd5', text: "Prep bag for next day", effort: 2, equipment: [], timeOfDay: 'evening' },
+      { id: 'd6', text: "Load laundry", effort: 1, equipment: ['laundry'], timeOfDay: 'morning' }
     ];
     const EFFORT_LABELS = { 1: 'Low effort', 2: 'Medium effort', 3: 'High effort' };
     
     const EQUIPMENT = {
-      spray: { name: 'Cleaning spray', icon: '<svg viewBox="0 0 24 24"><path d="M9 6l2-4h2l2 4"/><rect x="8" y="6" width="8" height="4" rx="1"/><path d="M10 10v10a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V10"/><path d="M8 14h8"/><path d="M12 2v2"/></svg>' },
-      cloth: { name: 'Cloth/Rag', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M8 6v4"/><path d="M16 6v4"/></svg>' },
+      spray: { name: 'Cleaning spray', icon: '<svg viewBox="0 0 24 24"><rect x="6" y="10" width="10" height="12" rx="2"/><path d="M8 10V8a3 3 0 0 1 6 0v2"/><path d="M14 6h4l-2-4"/><path d="M16 4l2 1"/><path d="M11 10V7"/></svg>' },
+      cloth: { name: 'Cloth/Rag', icon: '<svg viewBox="0 0 24 24"><path d="M6 4h8l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M14 4v4h4"/></svg>' },
       broom: { name: 'Broom', icon: '<svg viewBox="0 0 24 24"><path d="M12 2v8"/><path d="M4 22l4-12h8l4 12"/><path d="M7 14h10"/></svg>' },
       mop: { name: 'Mop', icon: '<svg viewBox="0 0 24 24"><path d="M12 2v10"/><rect x="8" y="12" width="8" height="3" rx="1"/><path d="M6 15v7"/><path d="M10 15v7"/><path d="M14 15v7"/><path d="M18 15v7"/></svg>' },
       vacuum: { name: 'Vacuum', icon: '<svg viewBox="0 0 24 24"><circle cx="8" cy="18" r="3"/><path d="M11 18h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3"/><path d="M14 6l-4 6"/><path d="M8 15V6a2 2 0 0 1 2-2h1"/></svg>' },
@@ -1020,7 +1175,10 @@
       brush: { name: 'Scrub brush', icon: '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="8" rx="2"/><path d="M8 12v6"/><path d="M12 12v6"/><path d="M16 12v6"/><path d="M6 8h12"/></svg>' },
       squeegee: { name: 'Squeegee', icon: '<svg viewBox="0 0 24 24"><path d="M4 6h16a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M12 12v8"/></svg>' },
       bin: { name: 'Trash bag', icon: '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"/></svg>' },
-      laundry: { name: 'Laundry basket', icon: '<svg viewBox="0 0 24 24"><path d="M4 6l2 14h12l2-14"/><path d="M2 6h20"/><path d="M8 6V4"/><path d="M16 6V4"/><path d="M9 11c1 2 5 2 6 0"/></svg>' }
+      laundry: { name: 'Laundry basket', icon: '<svg viewBox="0 0 24 24"><path d="M4 6l2 14h12l2-14"/><path d="M2 6h20"/><path d="M8 6V4"/><path d="M16 6V4"/><path d="M9 11c1 2 5 2 6 0"/></svg>' },
+      stool: { name: 'Step stool', icon: '<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="4" rx="1"/><path d="M7 8v12"/><path d="M17 8v12"/><path d="M7 14h10"/></svg>' },
+      wipes: { name: 'Wet wipes', icon: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8c-2 2-2 4 0 6s2 4 0 6"/><circle cx="12" cy="12" r="2"/></svg>' },
+      paper: { name: 'Paper towels', icon: '<svg viewBox="0 0 24 24"><path d="M12 3c-4 0-7 1-7 3v12c0 2 3 3 7 3s7-1 7-3V6c0-2-3-3-7-3z"/><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 12c0 2 3 3 7 3s7-1 7-3"/></svg>' }
     };
     const AFFIRMATIONS = [
       "Progress, not perfection. You're doing great.",
@@ -1036,10 +1194,10 @@
       weekStartDate: null, timerMinutes: 20, timerSeconds: 0,
       timerRunning: false, timerInterval: null, streak: 0,
       lastActiveDate: null, dailyLog: {}, energyLevel: 2,
-      filterVisible: true, filterActive: true,
+      filterVisible: false, filterActive: false,
       calendarMonth: new Date().getMonth(), calendarYear: new Date().getFullYear(),
       selectedDate: null, focusTasks: [], focusIndex: 0,
-      enabledEquipment: Object.keys(EQUIPMENT)
+      enabledEquipment: ['spray', 'cloth', 'broom', 'mop', 'vacuum', 'bucket', 'sponge', 'gloves', 'duster', 'iron', 'brush', 'squeegee', 'bin', 'laundry', 'stool', 'wipes', 'paper']
     };
 
     function init() {
@@ -1143,17 +1301,26 @@
       ).join('')}</div>`;
     }
 
+    function renderTimeIcon(timeOfDay) {
+      if (timeOfDay === 'morning') {
+        return '<span class="time-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg></span>';
+      } else if (timeOfDay === 'evening') {
+        return '<span class="time-icon"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>';
+      }
+      return '';
+    }
+
     function renderDailyTasks() {
       const c = document.getElementById('dailyTasks');
       const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
       let vis = 0, done = 0;
-      c.innerHTML = state.dailyTasks.map(t => {
+      c.innerHTML = state.dailyTasks.map((t, idx) => {
         const comp = log.daily && log.daily[t.id];
         const show = shouldShowTask(t.effort, comp);
         if (show) vis++;
         if (comp) done++;
-        return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="toggleDaily('${t.id}')">
-          <div class="task-checkbox"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="openTaskFocus('daily', ${idx})">
+          <div class="task-checkbox" onclick="event.stopPropagation(); toggleDaily('${t.id}')">${renderTimeIcon(t.timeOfDay)}<svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
           <div class="task-content">
             <div class="task-text">${t.text}</div>
             <div class="task-meta"><span class="effort-dot ${t.effort === 1 ? 'low' : t.effort === 2 ? 'med' : 'high'}"></span>${EFFORT_LABELS[t.effort]}</div>
@@ -1175,8 +1342,8 @@
         const show = shouldShowTask(t.effort, comp);
         if (show) vis++;
         if (comp) done++;
-        return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="toggleZone('${id}')">
-          <div class="task-checkbox"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="openTaskFocus('zone', ${i})">
+          <div class="task-checkbox" onclick="event.stopPropagation(); toggleZone('${id}')"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
           <div class="task-content">
             <div class="task-text">${t.text}</div>
             <div class="task-meta"><span class="effort-dot ${t.effort === 1 ? 'low' : t.effort === 2 ? 'med' : 'high'}"></span>${EFFORT_LABELS[t.effort]}</div>
@@ -1190,15 +1357,27 @@
     function toggleDaily(id) {
       const k = getTodayKey();
       if (!state.dailyLog[k]) state.dailyLog[k] = { daily: {}, zone: {} };
+      const wasCompleted = state.dailyLog[k].daily[id];
       state.dailyLog[k].daily[id] = !state.dailyLog[k].daily[id];
       recordActivity(); saveState(); renderDailyTasks(); updateProgress();
+      
+      // Show confetti when completing a task (not uncompleting)
+      if (!wasCompleted) {
+        showConfetti();
+      }
     }
 
     function toggleZone(id) {
       const k = getTodayKey();
       if (!state.dailyLog[k]) state.dailyLog[k] = { daily: {}, zone: {} };
+      const wasCompleted = state.dailyLog[k].zone[id];
       state.dailyLog[k].zone[id] = !state.dailyLog[k].zone[id];
       recordActivity(); saveState(); renderZoneTasks(); updateProgress();
+      
+      // Show confetti when completing a task (not uncompleting)
+      if (!wasCompleted) {
+        showConfetti();
+      }
     }
 
     function recordActivity() {
@@ -1275,6 +1454,7 @@
     function timerDone() {
       pauseTimer(); state.timerSeconds = 0; updateTimerDisplay();
       showToast("Time's up! Amazing work! 🎉");
+      showConfetti();
       if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
     }
 
@@ -1286,6 +1466,56 @@
     }
 
     // Focus Mode
+    function openTaskFocus(type, index) {
+      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      const z = state.zones[state.currentZoneIndex];
+      state.focusTasks = [];
+      
+      // Get the tapped task
+      let tappedTask;
+      let tappedId;
+      if (type === 'daily') {
+        const task = state.dailyTasks[index];
+        tappedId = task.id;
+        if (log.daily && log.daily[tappedId]) return; // Already completed
+        tappedTask = { type: 'daily', id: tappedId, text: task.text, effort: task.effort, equipment: task.equipment || [] };
+      } else {
+        const task = z.tasks[index];
+        tappedId = `z${state.currentZoneIndex}_${index}`;
+        if (log.zone && log.zone[tappedId]) return; // Already completed
+        tappedTask = { type: 'zone', id: tappedId, text: task.text, effort: task.effort, equipment: task.equipment || [] };
+      }
+      
+      // Add the tapped task first
+      state.focusTasks.push(tappedTask);
+      
+      // Then add all other uncompleted tasks that pass the filter
+      state.dailyTasks.forEach(t => {
+        const comp = log.daily && log.daily[t.id];
+        if (!comp && shouldShowTask(t.effort, false) && t.id !== tappedId) {
+          state.focusTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
+        }
+      });
+      z.tasks.forEach((t, i) => {
+        const id = `z${state.currentZoneIndex}_${i}`;
+        const comp = log.zone && log.zone[id];
+        if (!comp && shouldShowTask(t.effort, false) && id !== tappedId) {
+          state.focusTasks.push({ type: 'zone', id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
+        }
+      });
+      
+      state.focusIndex = 0;
+      document.getElementById('focusOverlay').classList.add('active');
+      document.getElementById('focusActiveContent').style.display = 'block';
+      document.getElementById('focusCompleteMsg').classList.remove('show');
+      updateFocusTask();
+      
+      if (!state.timerRunning) {
+        if (state.timerSeconds === 0) state.timerSeconds = state.timerMinutes * 60;
+        startTimer();
+      }
+    }
+
     function enterFocusMode() {
       const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
       const z = state.zones[state.currentZoneIndex];
@@ -1351,12 +1581,15 @@
       const t = state.focusTasks[state.focusIndex];
       if (t.type === 'daily') toggleDaily(t.id);
       else toggleZone(t.id);
-      state.focusIndex++;
+      // Remove the completed task from focus list
+      state.focusTasks.splice(state.focusIndex, 1);
       updateFocusTask();
     }
 
     function skipFocusTask() {
-      state.focusIndex++;
+      // Remove the skipped task from the focus list and move to next
+      state.focusTasks.splice(state.focusIndex, 1);
+      // Don't increment index since we removed the current one
       updateFocusTask();
     }
 
@@ -1555,36 +1788,114 @@
 
     function renderDailyEditorList() {
       document.getElementById('dailyEditorList').innerHTML = state.dailyTasks.map((t, i) => `
-        <div class="edit-task-item" style="flex-direction: column; align-items: stretch;">
+        <div class="edit-task-item" style="flex-direction: column; align-items: stretch;" draggable="true" data-index="${i}" ondragstart="dragTaskStart(event, 'daily')" ondragover="dragTaskOver(event)" ondrop="dropTask(event, 'daily')" ondragend="dragTaskEnd(event)">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="text" class="edit-task-input" value="${t.text}" data-index="${i}">
-            <select class="effort-select" data-index="${i}">
+            <div class="edit-task-drag">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+            </div>
+            <input type="text" class="edit-task-input" value="${t.text}" data-index="${i}" onchange="updateDailyTaskText(${i}, this.value)" onblur="updateDailyTaskText(${i}, this.value)">
+            <select class="effort-select" data-index="${i}" onchange="updateDailyTaskEffort(${i}, this.value)">
               <option value="1" ${t.effort === 1 ? 'selected' : ''}>Low</option>
               <option value="2" ${t.effort === 2 ? 'selected' : ''}>Medium</option>
               <option value="3" ${t.effort === 3 ? 'selected' : ''}>High</option>
             </select>
             <button class="delete-task-btn" onclick="deleteDailyTask(${i})"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; margin-left: 24px;">
+            <span style="font-size: 0.75rem; color: var(--warm-gray);">Time:</span>
+            <div class="time-selector">
+              <button type="button" class="time-btn ${!t.timeOfDay ? 'selected' : ''}" onclick="setDailyTaskTime(${i}, null)" title="Any time">—</button>
+              <button type="button" class="time-btn ${t.timeOfDay === 'morning' ? 'selected' : ''}" onclick="setDailyTaskTime(${i}, 'morning')" title="Morning">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>
+              </button>
+              <button type="button" class="time-btn ${t.timeOfDay === 'evening' ? 'selected' : ''}" onclick="setDailyTaskTime(${i}, 'evening')" title="Evening">
+                <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </button>
+            </div>
+          </div>
           ${renderEquipmentSelector(t.equipment, i, 'daily')}
         </div>
       `).join('');
     }
 
-    function addDailyTask() {
-      state.dailyTasks.push({ id: 'd' + Date.now(), text: 'New task', effort: 1, equipment: [] });
+    function setDailyTaskTime(index, time) {
+      state.dailyTasks[index].timeOfDay = time;
+      saveState();
       renderDailyEditorList();
     }
 
-    function deleteDailyTask(i) { state.dailyTasks.splice(i, 1); renderDailyEditorList(); }
+    let draggedTaskIndex = null;
+    let draggedTaskType = null;
+
+    function dragTaskStart(e, type) {
+      draggedTaskIndex = parseInt(e.target.closest('.edit-task-item').dataset.index);
+      draggedTaskType = type;
+      e.target.closest('.edit-task-item').classList.add('dragging');
+    }
+
+    function dragTaskOver(e) {
+      e.preventDefault();
+    }
+
+    function dropTask(e, type) {
+      e.preventDefault();
+      const targetItem = e.target.closest('.edit-task-item');
+      if (!targetItem) return;
+      
+      const targetIndex = parseInt(targetItem.dataset.index);
+      if (draggedTaskIndex !== null && draggedTaskIndex !== targetIndex && draggedTaskType === type) {
+        if (type === 'daily') {
+          const [removed] = state.dailyTasks.splice(draggedTaskIndex, 1);
+          state.dailyTasks.splice(targetIndex, 0, removed);
+          saveState();
+          renderDailyEditorList();
+        } else if (type === 'zone') {
+          const z = state.zones[state.currentZoneIndex];
+          const [removed] = z.tasks.splice(draggedTaskIndex, 1);
+          z.tasks.splice(targetIndex, 0, removed);
+          saveState();
+          renderZoneEditorList();
+        }
+      }
+    }
+
+    function dragTaskEnd(e) {
+      document.querySelectorAll('.edit-task-item').forEach(el => el.classList.remove('dragging'));
+      draggedTaskIndex = null;
+      draggedTaskType = null;
+    }
+
+    function updateDailyTaskText(index, value) {
+      state.dailyTasks[index].text = value;
+      saveState();
+    }
+
+    function updateDailyTaskEffort(index, value) {
+      state.dailyTasks[index].effort = parseInt(value);
+      saveState();
+    }
+
+    function addDailyTask() {
+      state.dailyTasks.push({ id: 'd' + Date.now(), text: '', effort: 1, equipment: [], timeOfDay: null });
+      saveState();
+      renderDailyEditorList();
+      // Focus the new input
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('#dailyEditorList .edit-task-input');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }, 50);
+    }
+
+    function deleteDailyTask(i) { 
+      state.dailyTasks.splice(i, 1); 
+      saveState();
+      renderDailyEditorList(); 
+    }
 
     function saveDailyEdits() {
-      const inputs = document.querySelectorAll('#dailyEditorList .edit-task-input');
-      const selects = document.querySelectorAll('#dailyEditorList .effort-select');
-      inputs.forEach((inp, i) => {
-        state.dailyTasks[i].text = inp.value;
-        state.dailyTasks[i].effort = parseInt(selects[i].value);
-      });
-      saveState(); closeModal('dailyEditorModal'); renderDailyTasks();
+      saveState();
+      closeModal('dailyEditorModal'); 
+      renderDailyTasks();
       showToast('Daily tasks updated!');
     }
 
@@ -1599,10 +1910,13 @@
     function renderZoneEditorList() {
       const z = state.zones[state.currentZoneIndex];
       document.getElementById('zoneEditorList').innerHTML = z.tasks.map((t, i) => `
-        <div class="edit-task-item" style="flex-direction: column; align-items: stretch;">
+        <div class="edit-task-item" style="flex-direction: column; align-items: stretch;" draggable="true" data-index="${i}" ondragstart="dragTaskStart(event, 'zone')" ondragover="dragTaskOver(event)" ondrop="dropTask(event, 'zone')" ondragend="dragTaskEnd(event)">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="text" class="edit-task-input" value="${t.text}" data-index="${i}">
-            <select class="effort-select" data-index="${i}">
+            <div class="edit-task-drag">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+            </div>
+            <input type="text" class="edit-task-input" value="${t.text}" data-index="${i}" onchange="updateZoneTaskText(${i}, this.value)" onblur="updateZoneTaskText(${i}, this.value)">
+            <select class="effort-select" data-index="${i}" onchange="updateZoneTaskEffort(${i}, this.value)">
               <option value="1" ${t.effort === 1 ? 'selected' : ''}>Low</option>
               <option value="2" ${t.effort === 2 ? 'selected' : ''}>Medium</option>
               <option value="3" ${t.effort === 3 ? 'selected' : ''}>High</option>
@@ -1614,23 +1928,39 @@
       `).join('');
     }
 
-    function addZoneTask() {
-      state.zones[state.currentZoneIndex].tasks.push({ text: 'New task', effort: 1, equipment: [] });
-      renderZoneEditorList();
+    function updateZoneTaskText(index, value) {
+      state.zones[state.currentZoneIndex].tasks[index].text = value;
+      saveState();
     }
 
-    function deleteZoneTask(i) { state.zones[state.currentZoneIndex].tasks.splice(i, 1); renderZoneEditorList(); }
+    function updateZoneTaskEffort(index, value) {
+      state.zones[state.currentZoneIndex].tasks[index].effort = parseInt(value);
+      saveState();
+    }
+
+    function addZoneTask() {
+      state.zones[state.currentZoneIndex].tasks.push({ text: '', effort: 1, equipment: [] });
+      saveState();
+      renderZoneEditorList();
+      // Focus the new input
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('#zoneEditorList .edit-task-input');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }, 50);
+    }
+
+    function deleteZoneTask(i) { 
+      state.zones[state.currentZoneIndex].tasks.splice(i, 1); 
+      saveState();
+      renderZoneEditorList(); 
+    }
 
     function saveZoneEdits() {
       const z = state.zones[state.currentZoneIndex];
       z.name = document.getElementById('zoneNameInput').value;
-      const inputs = document.querySelectorAll('#zoneEditorList .edit-task-input');
-      const selects = document.querySelectorAll('#zoneEditorList .effort-select');
-      inputs.forEach((inp, i) => {
-        z.tasks[i].text = inp.value;
-        z.tasks[i].effort = parseInt(selects[i].value);
-      });
-      saveState(); closeModal('zoneEditorModal'); renderAll();
+      saveState(); 
+      closeModal('zoneEditorModal'); 
+      renderAll();
       showToast('Zone updated!');
     }
 
@@ -1717,10 +2047,18 @@
       showToast('New zone added!');
     }
 
+    let zoneToDelete = null;
+
     function deleteZone(index) {
       if (state.zones.length <= 1) return;
-      if (confirm(`Delete "${state.zones[index].name}"? This cannot be undone.`)) {
-        state.zones.splice(index, 1);
+      zoneToDelete = index;
+      document.getElementById('deleteZoneName').textContent = state.zones[index].name;
+      document.getElementById('deleteZoneConfirmModal').classList.add('active');
+    }
+
+    function confirmDeleteZone() {
+      if (zoneToDelete !== null) {
+        state.zones.splice(zoneToDelete, 1);
         if (state.currentZoneIndex >= state.zones.length) {
           state.currentZoneIndex = state.zones.length - 1;
         }
@@ -1728,7 +2066,9 @@
         renderZonesManagerList();
         renderAll();
         showToast('Zone deleted');
+        zoneToDelete = null;
       }
+      closeModal('deleteZoneConfirmModal');
     }
 
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
@@ -1743,10 +2083,72 @@
       location.reload();
     }
 
+    function exportData() {
+      const dataStr = JSON.stringify(state, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mise-en-place-backup-' + new Date().toISOString().split('T')[0] + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Data exported!');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          // Validate it has expected properties
+          if (imported.zones && imported.dailyTasks) {
+            state = { ...state, ...imported };
+            state.timerSeconds = state.timerMinutes * 60;
+            state.timerRunning = false;
+            saveState();
+            renderAll();
+            showToast('Data imported successfully!');
+            closeModal('settingsModal');
+          } else {
+            showToast('Invalid file format');
+          }
+        } catch (err) {
+          showToast('Error reading file');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = ''; // Reset input
+    }
+
     function showToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg; t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function showConfetti() {
+      const container = document.createElement('div');
+      container.className = 'confetti-container';
+      document.body.appendChild(container);
+      
+      const colors = ['#6b8a54', '#8fa876', '#b5c4a3', '#d4dbc9', '#f0e6a3', '#c9dbe8'];
+      
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.8 + 's';
+        confetti.style.animationDuration = (3 + Math.random() * 2) + 's';
+        container.appendChild(confetti);
+      }
+      
+      setTimeout(() => container.remove(), 6000);
     }
 
     document.querySelectorAll('.modal-overlay').forEach(m => {
