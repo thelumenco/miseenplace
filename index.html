@@ -2722,7 +2722,8 @@
       if (type === 'daily') {
         task = state.dailyTasks[taskIndex];
       } else {
-        task = state.zones[state.currentZoneIndex].tasks[taskIndex];
+        const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+        task = state.zones[idx].tasks[taskIndex];
       }
       
       if (!task.equipment) task.equipment = [];
@@ -2733,6 +2734,8 @@
       } else {
         task.equipment.push(equipmentKey);
       }
+      
+      saveState();
       
       // Update button state
       const btn = document.querySelector(`.equipment-selector[data-task="${taskIndex}"][data-type="${type}"] .equipment-toggle[data-equipment="${equipmentKey}"]`);
@@ -2853,6 +2856,7 @@
     }
 
     function openZoneEditor() {
+      editingZoneIndex = state.currentZoneIndex;
       const z = state.zones[state.currentZoneIndex];
       document.getElementById('zoneEditorTitle').textContent = `Edit ${z.name}`;
       document.getElementById('zoneNameInput').value = z.name;
@@ -2872,13 +2876,15 @@
     }
 
     function selectZoneIcon(iconKey) {
-      state.zones[state.currentZoneIndex].icon = iconKey;
+      const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+      state.zones[idx].icon = iconKey;
       saveState();
       renderZoneIconSelector(iconKey);
     }
 
-    function renderZoneEditorList() {
-      const z = state.zones[state.currentZoneIndex];
+    function renderZoneEditorList(zoneIndex) {
+      const idx = zoneIndex !== undefined ? zoneIndex : (editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex);
+      const z = state.zones[idx];
       document.getElementById('zoneEditorList').innerHTML = z.tasks.map((t, i) => `
         <div class="edit-task-item" style="flex-direction: column; align-items: stretch;" draggable="true" data-index="${i}" ondragstart="dragTaskStart(event, 'zone')" ondragover="dragTaskOver(event)" ondrop="dropTask(event, 'zone')" ondragend="dragTaskEnd(event)">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -2899,17 +2905,20 @@
     }
 
     function updateZoneTaskText(index, value) {
-      state.zones[state.currentZoneIndex].tasks[index].text = value;
+      const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+      state.zones[idx].tasks[index].text = value;
       saveState();
     }
 
     function updateZoneTaskEffort(index, value) {
-      state.zones[state.currentZoneIndex].tasks[index].effort = parseInt(value);
+      const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+      state.zones[idx].tasks[index].effort = parseInt(value);
       saveState();
     }
 
     function addZoneTask() {
-      state.zones[state.currentZoneIndex].tasks.push({ text: '', effort: 1, equipment: [] });
+      const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+      state.zones[idx].tasks.push({ text: '', effort: 1, equipment: [] });
       saveState();
       renderZoneEditorList();
       // Focus the new input
@@ -2920,16 +2929,19 @@
     }
 
     function deleteZoneTask(i) { 
-      state.zones[state.currentZoneIndex].tasks.splice(i, 1); 
+      const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+      state.zones[idx].tasks.splice(i, 1); 
       saveState();
       renderZoneEditorList(); 
     }
 
     function saveZoneEdits() {
-      const z = state.zones[state.currentZoneIndex];
+      const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+      const z = state.zones[idx];
       z.name = document.getElementById('zoneNameInput').value;
       saveState(); 
-      closeModal('zoneEditorModal'); 
+      closeModal('zoneEditorModal');
+      editingZoneIndex = null;
       renderAll();
       showToast('Zone updated!');
     }
@@ -3002,10 +3014,21 @@
     }
 
     function editZoneFromManager(index) {
-      state.currentZoneIndex = index;
-      saveState();
+      // Open zone editor for the selected zone without changing current zone
       closeModal('zonesManagerModal');
-      openZoneEditor();
+      openZoneEditorForIndex(index);
+    }
+
+    let editingZoneIndex = null;
+
+    function openZoneEditorForIndex(index) {
+      editingZoneIndex = index;
+      const z = state.zones[index];
+      document.getElementById('zoneEditorTitle').textContent = `Edit ${z.name}`;
+      document.getElementById('zoneNameInput').value = z.name;
+      renderZoneIconSelector(z.icon || 'living');
+      renderZoneEditorList(index);
+      document.getElementById('zoneEditorModal').classList.add('active');
     }
 
     function addNewZone() {
