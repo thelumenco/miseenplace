@@ -1021,20 +1021,11 @@
     .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .calendar-day {
       aspect-ratio: 1;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       border-radius: 50%; font-size: 0.875rem;
       color: var(--charcoal); cursor: pointer;
       transition: all 0.2s ease; position: relative;
-      gap: 0;
     }
-    .calendar-day-num { line-height: 1; }
-    .calendar-day-mins { 
-      font-size: 0.5rem; 
-      color: var(--sage-500); 
-      line-height: 1;
-      margin-top: 1px;
-    }
-    .calendar-day.selected .calendar-day-mins { color: rgba(255,255,255,0.8); }
     .calendar-day:hover { background: var(--sage-100); }
     .calendar-day.other-month { color: var(--sage-200); }
     .calendar-day.today { font-weight: 600; color: var(--sage-700); }
@@ -1352,7 +1343,7 @@
             <div class="timer-display" id="timerDisplay">20:00</div>
           </div>
           <div class="timer-info">
-            <div class="timer-label">Daily Timer</div>
+            <div class="timer-label">Timer</div>
             <div class="timer-status" id="timerStatus">Let's begin</div>
           </div>
           <div class="timer-controls">
@@ -2534,7 +2525,7 @@
       document.getElementById('timerProgress').style.strokeDashoffset = 226.19 - prog;
       const focusProg = ((total - state.timerSeconds) / total) * 565.48;
       document.getElementById('focusTimerProgress').style.strokeDashoffset = 565.48 - focusProg;
-      const status = state.timerRunning ? "Time to tidy!" : state.timerSeconds === 0 ? "Great job! 🎉" : state.timerSeconds < total ? "Paused" : "Let's begin";
+      const status = state.timerRunning ? "Time to tidy!" : state.timerSeconds === 0 ? "Great job!" : state.timerSeconds < total ? "Paused" : "Let's begin";
       document.getElementById('timerStatus').textContent = status;
     }
 
@@ -2988,13 +2979,9 @@
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${state.calendarYear}-${String(state.calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const hasAct = state.dailyLog[dateStr] && (Object.values(state.dailyLog[dateStr].daily || {}).some(Boolean) || Object.values(state.dailyLog[dateStr].zone || {}).some(Boolean));
-        const mins = (state.cleaningMinutes && state.cleaningMinutes[dateStr]) || 0;
         const isToday = dateStr === today;
         const isSel = dateStr === state.selectedDate;
-        html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasAct ? 'has-activity' : ''} ${isSel ? 'selected' : ''}" onclick="selectDate('${dateStr}')">
-          <span class="calendar-day-num">${d}</span>
-          ${mins > 0 ? `<span class="calendar-day-mins">${mins}m</span>` : ''}
-        </div>`;
+        html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasAct ? 'has-activity' : ''} ${isSel ? 'selected' : ''}" onclick="selectDate('${dateStr}')">${d}</div>`;
       }
       html += `</div>`;
       if (state.selectedDate) {
