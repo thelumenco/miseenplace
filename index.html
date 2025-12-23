@@ -1710,7 +1710,7 @@
       zones: [], dailyTasks: [], currentZoneIndex: 0,
       weekStartDate: null, timerMinutes: 20, timerSeconds: 0,
       timerRunning: false, timerInterval: null, streak: 0,
-      lastActiveDate: null, dailyLog: {}, energyLevel: 2,
+      lastActiveDate: null, dailyLog: {}, zoneLog: {}, energyLevel: 2,
       filterVisible: false, filterActive: false,
       calendarMonth: new Date().getMonth(), calendarYear: new Date().getFullYear(),
       selectedDate: null, focusTasks: [], focusIndex: 0,
@@ -1965,7 +1965,7 @@
     function renderZoneTasks() {
       const c = document.getElementById('zoneTasks');
       const z = state.zones[state.currentZoneIndex];
-      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      if (!state.zoneLog) state.zoneLog = {};
       let vis = 0, done = 0;
       
       // Sort tasks: incomplete first, completed at bottom
@@ -1973,14 +1973,14 @@
         .sort((a, b) => {
           const aId = `z${state.currentZoneIndex}_${a.originalIndex}`;
           const bId = `z${state.currentZoneIndex}_${b.originalIndex}`;
-          const aComp = log.zone && log.zone[aId] ? 1 : 0;
-          const bComp = log.zone && log.zone[bId] ? 1 : 0;
+          const aComp = state.zoneLog[aId] ? 1 : 0;
+          const bComp = state.zoneLog[bId] ? 1 : 0;
           return aComp - bComp;
         });
       
       c.innerHTML = sortedTasks.map(t => {
         const id = `z${state.currentZoneIndex}_${t.originalIndex}`;
-        const comp = log.zone && log.zone[id];
+        const comp = state.zoneLog[id];
         const show = shouldShowTask(t.effort, comp, t.equipment);
         if (show) vis++;
         if (comp) done++;
@@ -2010,10 +2010,9 @@
     }
 
     function toggleZone(id) {
-      const k = getTodayKey();
-      if (!state.dailyLog[k]) state.dailyLog[k] = { daily: {}, zone: {} };
-      const wasCompleted = state.dailyLog[k].zone[id];
-      state.dailyLog[k].zone[id] = !state.dailyLog[k].zone[id];
+      if (!state.zoneLog) state.zoneLog = {};
+      const wasCompleted = state.zoneLog[id];
+      state.zoneLog[id] = !state.zoneLog[id];
       recordActivity(); saveState(); renderZoneTasks(); updateProgress();
       
       // Show confetti when completing a task (not uncompleting)
@@ -2116,7 +2115,8 @@
 
     // Focus Mode
     function openTaskFocus(type, index) {
-      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      const log = state.dailyLog[getTodayKey()] || { daily: {} };
+      if (!state.zoneLog) state.zoneLog = {};
       const z = state.zones[state.currentZoneIndex];
       state.focusTasks = [];
       
@@ -2133,7 +2133,7 @@
       
       z.tasks.forEach((t, idx) => {
         const id = `z${state.currentZoneIndex}_${idx}`;
-        const comp = log.zone && log.zone[id];
+        const comp = state.zoneLog[id];
         if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
           allTasks.push({ type: 'zone', id, text: t.text, effort: t.effort, equipment: t.equipment || [], originalIndex: idx });
         }
@@ -2170,7 +2170,8 @@
     }
 
     function enterFocusMode() {
-      const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
+      const log = state.dailyLog[getTodayKey()] || { daily: {} };
+      if (!state.zoneLog) state.zoneLog = {};
       const z = state.zones[state.currentZoneIndex];
       state.focusTasks = [];
       
@@ -2183,7 +2184,7 @@
       });
       z.tasks.forEach((t, i) => {
         const id = `z${state.currentZoneIndex}_${i}`;
-        const comp = log.zone && log.zone[id];
+        const comp = state.zoneLog[id];
         if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
           state.focusTasks.push({ type: 'zone', id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
         }
@@ -2368,22 +2369,18 @@
     function openWeeklyReview() {
       const z = state.zones[state.currentZoneIndex];
       document.getElementById('reviewZoneName').textContent = z.name;
-      let done = [], skip = [...z.tasks.map(t => t.text)];
-      Object.values(state.dailyLog).forEach(log => {
-        if (log.zone) {
-          Object.entries(log.zone).forEach(([k, v]) => {
-            if (k.startsWith(`z${state.currentZoneIndex}_`) && v) {
-              const idx = parseInt(k.split('_')[1]);
-              const txt = z.tasks[idx]?.text;
-              if (txt && !done.includes(txt)) {
-                done.push(txt);
-                const si = skip.indexOf(txt);
-                if (si > -1) skip.splice(si, 1);
-              }
-            }
-          });
+      if (!state.zoneLog) state.zoneLog = {};
+      
+      let done = [], skip = [];
+      z.tasks.forEach((t, idx) => {
+        const id = `z${state.currentZoneIndex}_${idx}`;
+        if (state.zoneLog[id]) {
+          done.push(t.text);
+        } else {
+          skip.push(t.text);
         }
       });
+      
       document.getElementById('reviewCompleted').textContent = done.length;
       document.getElementById('reviewSkipped').textContent = skip.length;
       document.getElementById('reviewCompletedList').innerHTML = done.length ? done.map(t => `<div class="review-task"><svg class="review-task-icon done" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${t}</div>`).join('') : '<div class="day-detail-empty">No tasks completed yet</div>';
@@ -2392,7 +2389,7 @@
     }
 
     function moveToNextZone() {
-      Object.keys(state.dailyLog).forEach(k => { if (state.dailyLog[k].zone) state.dailyLog[k].zone = {}; });
+      state.zoneLog = {}; // Clear zone task completions
       state.currentZoneIndex = (state.currentZoneIndex + 1) % state.zones.length;
       state.weekStartDate = getWeekStart();
       state.weekChangePending = false;
