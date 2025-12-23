@@ -2363,9 +2363,13 @@
     function toggleWeekly(id) {
       if (!state.weeklyLog) state.weeklyLog = {};
       const weekKey = getWeekKey();
+      const today = getTodayKey();
       if (!state.weeklyLog[weekKey]) state.weeklyLog[weekKey] = {};
       const wasCompleted = state.weeklyLog[weekKey][id];
-      state.weeklyLog[weekKey][id] = !state.weeklyLog[weekKey][id];
+      
+      // Store the date when completed, or false if uncompleted
+      state.weeklyLog[weekKey][id] = wasCompleted ? false : today;
+      
       recordActivity(); saveState(); renderWeeklyTasks(); updateProgress();
       
       if (!wasCompleted) {
@@ -2988,7 +2992,27 @@
         const log = state.dailyLog[state.selectedDate] || { daily: {}, zone: {} };
         const mins = (state.cleaningMinutes && state.cleaningMinutes[state.selectedDate]) || 0;
         const tasks = [];
+        
+        // Daily tasks
         state.dailyTasks.forEach(t => { if (log.daily && log.daily[t.id]) tasks.push(t.text); });
+        
+        // Weekly tasks - show tasks completed on this specific date
+        if (state.weeklyLog) {
+          const selectedDateObj = new Date(state.selectedDate + 'T12:00:00');
+          const sunday = new Date(selectedDateObj);
+          sunday.setDate(selectedDateObj.getDate() - selectedDateObj.getDay());
+          const weekKey = sunday.toISOString().split('T')[0];
+          const weeklyLog = state.weeklyLog[weekKey] || {};
+          
+          state.weeklyTasks.forEach(t => { 
+            // Check if completed on this specific date
+            if (weeklyLog[t.id] === state.selectedDate) {
+              tasks.push(`Weekly: ${t.text}`);
+            }
+          });
+        }
+        
+        // Zone tasks
         state.zones.forEach((z, zi) => {
           z.tasks.forEach((t, ti) => { if (log.zone && log.zone[`z${zi}_${ti}`]) tasks.push(`${z.name}: ${t.text}`); });
         });
