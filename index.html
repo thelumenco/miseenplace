@@ -1353,7 +1353,7 @@
           </div>
           <div class="timer-info">
             <div class="timer-label">Daily Timer</div>
-            <div class="timer-status" id="timerStatus">Ready to start</div>
+            <div class="timer-status" id="timerStatus">Let's begin</div>
           </div>
           <div class="timer-controls">
             <button class="timer-btn timer-btn-primary" onclick="toggleTimer()">
@@ -1487,7 +1487,7 @@
             </svg>
             <div class="focus-timer-display" id="focusTimerDisplay">20:00</div>
           </div>
-          <div class="focus-task-label">Current Task</div>
+          <div class="focus-task-label" id="focusTaskLabel">Daily Essentials</div>
           <div class="focus-task-text" id="focusTaskText">Loading...</div>
           <div class="focus-equipment" id="focusEquipment"></div>
           <div class="focus-actions">
@@ -1541,6 +1541,16 @@
                   <button class="chime-interval-btn" data-interval="10" onclick="setChimeInterval(10)">10 min</button>
                 </div>
               </div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <label class="settings-label">Streak Garden</label>
+            <div class="chime-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" id="gardenToggle" onchange="toggleGardenVisibility(this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">Show streak garden on home screen</span>
             </div>
           </div>
           <div class="settings-group">
@@ -1995,7 +2005,8 @@
       chimeEnabled: true,
       chimeSound: 'bowl',
       chimeInterval: 5,
-      currentTab: 'daily'
+      currentTab: 'daily',
+      gardenVisible: true
     };
 
     function switchTab(tab) {
@@ -2120,7 +2131,7 @@
       checkWeekChange();
       renderZoneHeader(); renderDailyTasks(); renderWeeklyTasks(); renderZoneTasks();
       renderTimer(); updateProgress(); updateStreak(); updateEnergyUI();
-      updateFilterUI(); updateTabs();
+      updateFilterUI(); updateTabs(); updateGardenVisibility();
     }
 
     function renderZoneHeader() {
@@ -2502,7 +2513,7 @@
       document.getElementById('timerProgress').style.strokeDashoffset = 226.19 - prog;
       const focusProg = ((total - state.timerSeconds) / total) * 565.48;
       document.getElementById('focusTimerProgress').style.strokeDashoffset = 565.48 - focusProg;
-      const status = state.timerRunning ? "Time to tidy!" : state.timerSeconds === 0 ? "Great job! 🎉" : state.timerSeconds < total ? "Paused" : "Ready to start";
+      const status = state.timerRunning ? "Time to tidy!" : state.timerSeconds === 0 ? "Great job! 🎉" : state.timerSeconds < total ? "Paused" : "Let's begin";
       document.getElementById('timerStatus').textContent = status;
     }
 
@@ -2694,6 +2705,11 @@
       const task = state.focusTasks[state.focusIndex];
       document.getElementById('focusTaskText').textContent = task.text;
       
+      // Update category label
+      const labelText = task.type === 'daily' ? 'Daily Essentials' : 
+                        task.type === 'weekly' ? 'Weekly Essentials' : 'Zone Cleaning';
+      document.getElementById('focusTaskLabel').textContent = labelText;
+      
       // Show equipment with names
       const equipContainer = document.getElementById('focusEquipment');
       if (task.equipment && task.equipment.length > 0) {
@@ -2748,8 +2764,22 @@
       renderZoneListSettings();
       renderEquipmentManager();
       renderChimeSettings();
+      document.getElementById('gardenToggle').checked = state.gardenVisible !== false;
       document.querySelectorAll('.timer-preset').forEach(b => b.classList.toggle('active', parseInt(b.dataset.minutes) === state.timerMinutes));
       document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function toggleGardenVisibility(visible) {
+      state.gardenVisible = visible;
+      saveState();
+      updateGardenVisibility();
+    }
+
+    function updateGardenVisibility() {
+      const garden = document.getElementById('gardenSection');
+      if (garden) {
+        garden.style.display = state.gardenVisible !== false ? 'block' : 'none';
+      }
     }
 
     function renderChimeSettings() {
