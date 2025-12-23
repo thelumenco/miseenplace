@@ -395,6 +395,26 @@
       background: var(--sage-100);
       padding: 4px 10px; border-radius: 12px;
     }
+    .time-filter {
+      font-size: 0.7rem;
+      color: var(--sage-600);
+      background: var(--sage-50);
+      border: 1px solid var(--sage-200);
+      padding: 4px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      padding-right: 20px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2352665c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+    }
+    .time-filter:focus {
+      border-color: var(--sage-400);
+    }
     .edit-section-btn {
       width: 28px; height: 28px; border-radius: 50%;
       border: none; background: transparent;
@@ -1292,6 +1312,12 @@
         <div class="section-header">
           <h2 class="section-title">Daily Essentials</h2>
           <div class="section-actions">
+            <select class="time-filter" id="dailyTimeFilter" onchange="setDailyTimeFilter(this.value)">
+              <option value="all">All</option>
+              <option value="morning">☀️ Morning</option>
+              <option value="evening">🌙 Evening</option>
+              <option value="anytime">Anytime</option>
+            </select>
             <span class="section-count" id="dailyCount">0/5</span>
             <button class="edit-section-btn" onclick="openDailyEditor()" title="Edit daily tasks">
               <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1837,6 +1863,7 @@
       timerRunning: false, timerInterval: null, streak: 0,
       lastActiveDate: null, dailyLog: {}, zoneLog: {}, energyLevel: 2,
       garden: [], gardenNeedsWater: false,
+      dailyTimeFilter: 'all',
       filterVisible: false, filterActive: false,
       calendarMonth: new Date().getMonth(), calendarYear: new Date().getFullYear(),
       selectedDate: null, focusTasks: [], focusIndex: 0,
@@ -2061,14 +2088,32 @@
       return '';
     }
 
+    function setDailyTimeFilter(value) {
+      state.dailyTimeFilter = value;
+      saveState();
+      renderDailyTasks();
+    }
+
     function renderDailyTasks() {
       const c = document.getElementById('dailyTasks');
       const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
       let vis = 0, done = 0;
       
+      // Filter by time of day
+      const timeFilter = state.dailyTimeFilter || 'all';
+      const filteredTasks = state.dailyTasks.filter(t => {
+        if (timeFilter === 'all') return true;
+        if (timeFilter === 'morning') return t.timeOfDay === 'morning';
+        if (timeFilter === 'evening') return t.timeOfDay === 'evening';
+        if (timeFilter === 'anytime') return !t.timeOfDay;
+        return true;
+      });
+      
       // Sort tasks: incomplete first, completed at bottom
-      const sortedTasks = state.dailyTasks.map((t, idx) => ({ ...t, originalIndex: idx }))
-        .sort((a, b) => {
+      const sortedTasks = filteredTasks.map((t) => {
+        const origIdx = state.dailyTasks.findIndex(orig => orig.id === t.id);
+        return { ...t, originalIndex: origIdx };
+      }).sort((a, b) => {
           const aComp = log.daily && log.daily[a.id] ? 1 : 0;
           const bComp = log.daily && log.daily[b.id] ? 1 : 0;
           return aComp - bComp;
@@ -2089,6 +2134,10 @@
         </div>`;
       }).join('');
       document.getElementById('dailyCount').textContent = `${done}/${vis}`;
+      
+      // Update dropdown to match state
+      const dropdown = document.getElementById('dailyTimeFilter');
+      if (dropdown) dropdown.value = state.dailyTimeFilter || 'all';
     }
 
     function renderZoneTasks() {
@@ -2447,6 +2496,9 @@
 
     function exitFocusMode() {
       document.getElementById('focusOverlay').classList.remove('active');
+      if (state.timerRunning) {
+        pauseTimer();
+      }
       renderAll();
     }
 
