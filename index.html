@@ -1903,12 +1903,33 @@
 
     // Audio context for chime sounds
     let audioContext = null;
+    let wakeLock = null;
     
     function getAudioContext() {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
       }
       return audioContext;
+    }
+
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => {
+            wakeLock = null;
+          });
+        }
+      } catch (err) {
+        console.log('Wake Lock not supported or failed:', err);
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+      }
     }
 
     const CHIME_SOUNDS = {
@@ -2639,6 +2660,7 @@
       document.getElementById('focusCompleteMsg').classList.remove('show');
       updateFocusTask();
       updateFocusChimeToggle();
+      requestWakeLock();
       
       if (!state.timerRunning) {
         if (state.timerSeconds === 0) state.timerSeconds = state.timerMinutes * 60;
@@ -2688,6 +2710,7 @@
       document.getElementById('focusCompleteMsg').classList.remove('show');
       updateFocusTask();
       updateFocusChimeToggle();
+      requestWakeLock();
       
       // Start timer if not already running
       if (!state.timerRunning) {
@@ -2756,6 +2779,7 @@
       if (state.timerRunning) {
         pauseTimer();
       }
+      releaseWakeLock();
       renderAll();
     }
 
