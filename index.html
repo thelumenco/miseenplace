@@ -383,11 +383,33 @@
     .section-header {
       display: flex; justify-content: space-between;
       align-items: center; margin: 24px 0 12px;
+      cursor: pointer;
     }
     .section-title {
       font-family: var(--font-serif);
       font-size: 1.25rem; font-weight: 600;
       color: var(--sage-800);
+    }
+    .section-title.collapsible {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .collapse-icon {
+      width: 16px;
+      height: 16px;
+      stroke: var(--sage-400);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      transition: transform 0.2s ease;
+    }
+    .section-header.collapsed .collapse-icon {
+      transform: rotate(-90deg);
+    }
+    .collapsible-content.collapsed {
+      display: none;
     }
     .section-actions { display: flex; align-items: center; gap: 8px; }
     .section-count {
@@ -980,11 +1002,20 @@
     .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .calendar-day {
       aspect-ratio: 1;
-      display: flex; align-items: center; justify-content: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       border-radius: 50%; font-size: 0.875rem;
       color: var(--charcoal); cursor: pointer;
       transition: all 0.2s ease; position: relative;
+      gap: 0;
     }
+    .calendar-day-num { line-height: 1; }
+    .calendar-day-mins { 
+      font-size: 0.5rem; 
+      color: var(--sage-500); 
+      line-height: 1;
+      margin-top: 1px;
+    }
+    .calendar-day.selected .calendar-day-mins { color: rgba(255,255,255,0.8); }
     .calendar-day:hover { background: var(--sage-100); }
     .calendar-day.other-month { color: var(--sage-200); }
     .calendar-day.today { font-weight: 600; color: var(--sage-700); }
@@ -1000,6 +1031,14 @@
       font-size: 0.75rem; text-transform: uppercase;
       letter-spacing: 0.1em; color: var(--warm-gray);
       margin-bottom: 8px;
+    }
+    .day-detail-mins {
+      font-size: 0.85rem;
+      color: var(--sage-600);
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: var(--sage-50);
+      border-radius: var(--radius-sm);
     }
     .day-detail-empty { color: var(--warm-gray); font-size: 0.875rem; font-style: italic; }
     .btn {
@@ -1309,9 +1348,12 @@
         </div>
       </div>
       <main class="main-content">
-        <div class="section-header">
-          <h2 class="section-title">Daily Essentials</h2>
-          <div class="section-actions">
+        <div class="section-header" onclick="toggleSection('daily')">
+          <h2 class="section-title collapsible">
+            <svg class="collapse-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            Daily Essentials
+          </h2>
+          <div class="section-actions" onclick="event.stopPropagation()">
             <select class="time-filter" id="dailyTimeFilter" onchange="setDailyTimeFilter(this.value)">
               <option value="all">All</option>
               <option value="morning">☀️ Morning</option>
@@ -1323,7 +1365,20 @@
             </button>
           </div>
         </div>
-        <div class="task-list" id="dailyTasks"></div>
+        <div class="task-list collapsible-content" id="dailyTasks"></div>
+
+        <div class="section-header" onclick="toggleSection('weekly')">
+          <h2 class="section-title collapsible">
+            <svg class="collapse-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            Weekly Essentials
+          </h2>
+          <div class="section-actions" onclick="event.stopPropagation()">
+            <button class="edit-section-btn" onclick="openWeeklyEditor()" title="Edit weekly tasks">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="task-list collapsible-content" id="weeklyTasks"></div>
 
         <div class="zone-indicator">
           <div class="zone-header-row">
@@ -1339,15 +1394,18 @@
           </div>
         </div>
 
-        <div class="section-header">
-          <h2 class="section-title">Zone Tasks</h2>
-          <div class="section-actions">
+        <div class="section-header" onclick="toggleSection('zone')">
+          <h2 class="section-title collapsible">
+            <svg class="collapse-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            Zone Tasks
+          </h2>
+          <div class="section-actions" onclick="event.stopPropagation()">
             <button class="edit-section-btn" onclick="openZoneEditor()" title="Edit zone tasks">
               <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
           </div>
         </div>
-        <div class="task-list" id="zoneTasks"></div>
+        <div class="task-list collapsible-content" id="zoneTasks"></div>
 
         <div class="garden-section" id="gardenSection">
           <div class="garden-header">
@@ -1541,6 +1599,25 @@
       </div>
     </div>
 
+    <!-- Weekly Tasks Editor -->
+    <div class="modal-overlay" id="weeklyEditorModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Edit Weekly Tasks</h2>
+          <button class="modal-close" onclick="closeModal('weeklyEditorModal')"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <p style="color: var(--warm-gray); font-size: 0.85rem; margin-bottom: 16px;">Weekly tasks reset every Sunday at midnight.</p>
+          <div id="weeklyEditorList"></div>
+          <button class="add-task-btn" onclick="addWeeklyTask()">
+            <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Task
+          </button>
+          <button class="btn btn-primary" onclick="saveWeeklyEdits()" style="margin-top: 16px;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Zone Tasks Editor -->
     <div class="modal-overlay" id="zoneEditorModal">
       <div class="modal">
@@ -1623,6 +1700,24 @@
       </div>
     </div>
 
+    <!-- Jump Zone Confirmation Modal -->
+    <div class="modal-overlay" id="jumpZoneConfirmModal" style="z-index: 1100;">
+      <div class="modal" style="max-width: 320px;">
+        <div class="modal-header">
+          <h2 class="modal-title">Switch Zone?</h2>
+          <button class="modal-close" onclick="cancelJumpToZone()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <p style="color: var(--warm-gray); margin-bottom: 16px;">Switch to <strong id="jumpZoneName">Zone</strong>?</p>
+          <p style="color: var(--warm-gray); margin-bottom: 24px; font-size: 0.85rem;">This will reset your zone task progress. Daily tasks will not be affected.</p>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" onclick="cancelJumpToZone()" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="executeJumpToZone()" style="flex: 1;">Switch</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Zones Manager Modal -->
     <div class="modal-overlay" id="zonesManagerModal">
       <div class="modal">
@@ -1699,6 +1794,13 @@
       { id: 'd4', text: "Pick up toys", effort: 2, equipment: [], timeOfDay: 'evening' },
       { id: 'd5', text: "Prep bag for next day", effort: 2, equipment: [], timeOfDay: 'evening' },
       { id: 'd6', text: "Load laundry", effort: 1, equipment: ['laundry'], timeOfDay: 'morning' }
+    ];
+    const DEFAULT_WEEKLY = [
+      { id: 'w1', text: "Change bed linens", effort: 2, equipment: ['laundry'] },
+      { id: 'w2', text: "Clean mirrors", effort: 1, equipment: ['spray', 'cloth'] },
+      { id: 'w3', text: "Vacuum floors", effort: 2, equipment: ['vacuum'] },
+      { id: 'w4', text: "Mop floors", effort: 2, equipment: ['mop', 'bucket'] },
+      { id: 'w5', text: "Empty all trash bins", effort: 1, equipment: ['bin'] }
     ];
     const EFFORT_LABELS = { 1: 'Low effort', 2: 'Medium effort', 3: 'High effort' };
     
@@ -1856,10 +1958,10 @@
     }
 
     let state = {
-      zones: [], dailyTasks: [], currentZoneIndex: 0,
+      zones: [], dailyTasks: [], weeklyTasks: [], currentZoneIndex: 0,
       weekStartDate: null, timerMinutes: 20, timerSeconds: 0,
       timerRunning: false, timerInterval: null, streak: 0,
-      lastActiveDate: null, dailyLog: {}, zoneLog: {}, energyLevel: 2,
+      lastActiveDate: null, dailyLog: {}, weeklyLog: {}, zoneLog: {}, cleaningMinutes: {}, energyLevel: 2,
       garden: [], gardenNeedsWater: false,
       dailyTimeFilter: 'all',
       filterVisible: false, filterActive: false,
@@ -1870,7 +1972,8 @@
       equipmentFilter: [],
       chimeEnabled: true,
       chimeSound: 'bowl',
-      chimeInterval: 5
+      chimeInterval: 5,
+      collapsedSections: {}
     };
 
     function init() {
@@ -1893,11 +1996,16 @@
         state = { ...state, ...p };
         // Ensure enabledEquipment exists for older saved states
         if (!state.enabledEquipment) state.enabledEquipment = Object.keys(EQUIPMENT);
+        // Ensure weeklyTasks exists for older saved states
+        if (!state.weeklyTasks || state.weeklyTasks.length === 0) {
+          state.weeklyTasks = JSON.parse(JSON.stringify(DEFAULT_WEEKLY));
+        }
         state.timerSeconds = state.timerMinutes * 60;
         state.timerRunning = false;
       } else {
         state.zones = JSON.parse(JSON.stringify(DEFAULT_ZONES));
         state.dailyTasks = JSON.parse(JSON.stringify(DEFAULT_DAILY));
+        state.weeklyTasks = JSON.parse(JSON.stringify(DEFAULT_WEEKLY));
         state.weekStartDate = getWeekStart();
         state.timerSeconds = state.timerMinutes * 60;
         saveState();
@@ -1970,9 +2078,9 @@
 
     function renderAll() {
       checkWeekChange();
-      renderZoneHeader(); renderDailyTasks(); renderZoneTasks();
+      renderZoneHeader(); renderDailyTasks(); renderWeeklyTasks(); renderZoneTasks();
       renderTimer(); updateProgress(); updateStreak(); updateEnergyUI();
-      updateFilterUI();
+      updateFilterUI(); updateCollapsedSections();
     }
 
     function renderZoneHeader() {
@@ -2092,6 +2200,41 @@
       renderDailyTasks();
     }
 
+    function toggleSection(section) {
+      if (!state.collapsedSections) state.collapsedSections = {};
+      state.collapsedSections[section] = !state.collapsedSections[section];
+      saveState();
+      updateCollapsedSections();
+    }
+
+    function updateCollapsedSections() {
+      if (!state.collapsedSections) state.collapsedSections = {};
+      
+      // Daily
+      const dailyHeader = document.querySelector('[onclick="toggleSection(\'daily\')"]');
+      const dailyContent = document.getElementById('dailyTasks');
+      if (dailyHeader && dailyContent) {
+        dailyHeader.classList.toggle('collapsed', state.collapsedSections.daily);
+        dailyContent.classList.toggle('collapsed', state.collapsedSections.daily);
+      }
+      
+      // Weekly
+      const weeklyHeader = document.querySelector('[onclick="toggleSection(\'weekly\')"]');
+      const weeklyContent = document.getElementById('weeklyTasks');
+      if (weeklyHeader && weeklyContent) {
+        weeklyHeader.classList.toggle('collapsed', state.collapsedSections.weekly);
+        weeklyContent.classList.toggle('collapsed', state.collapsedSections.weekly);
+      }
+      
+      // Zone
+      const zoneHeader = document.querySelector('[onclick="toggleSection(\'zone\')"]');
+      const zoneContent = document.getElementById('zoneTasks');
+      if (zoneHeader && zoneContent) {
+        zoneHeader.classList.toggle('collapsed', state.collapsedSections.zone);
+        zoneContent.classList.toggle('collapsed', state.collapsedSections.zone);
+      }
+    }
+
     function renderDailyTasks() {
       const c = document.getElementById('dailyTasks');
       const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
@@ -2135,6 +2278,69 @@
       // Update dropdown to match state
       const dropdown = document.getElementById('dailyTimeFilter');
       if (dropdown) dropdown.value = state.dailyTimeFilter || 'all';
+    }
+
+    function getWeekKey() {
+      // Returns a key for the current week (Sunday-based)
+      const now = new Date();
+      const sunday = new Date(now);
+      sunday.setDate(now.getDate() - now.getDay());
+      return sunday.toISOString().split('T')[0];
+    }
+
+    function checkWeeklyReset() {
+      const currentWeek = getWeekKey();
+      if (state.lastWeekKey && state.lastWeekKey !== currentWeek) {
+        // New week - reset weekly log
+        state.weeklyLog = {};
+        state.lastWeekKey = currentWeek;
+        saveState();
+      } else if (!state.lastWeekKey) {
+        state.lastWeekKey = currentWeek;
+        saveState();
+      }
+    }
+
+    function renderWeeklyTasks() {
+      checkWeeklyReset();
+      const c = document.getElementById('weeklyTasks');
+      if (!state.weeklyLog) state.weeklyLog = {};
+      const weekKey = getWeekKey();
+      const log = state.weeklyLog[weekKey] || {};
+      
+      // Sort tasks: incomplete first, completed at bottom
+      const sortedTasks = state.weeklyTasks.map((t, idx) => ({ ...t, originalIndex: idx }))
+        .sort((a, b) => {
+          const aComp = log[a.id] ? 1 : 0;
+          const bComp = log[b.id] ? 1 : 0;
+          return aComp - bComp;
+        });
+      
+      c.innerHTML = sortedTasks.map(t => {
+        const comp = log[t.id];
+        const show = shouldShowTask(t.effort, comp, t.equipment);
+        return `<div class="task-item ${comp ? 'completed' : ''} ${!show ? 'hidden' : ''}" onclick="openTaskFocus('weekly', ${t.originalIndex})">
+          <div class="task-checkbox" onclick="event.stopPropagation(); toggleWeekly('${t.id}')"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="task-content">
+            <div class="task-text">${t.text}</div>
+            <div class="task-meta"><span class="effort-dot ${t.effort === 1 ? 'low' : t.effort === 2 ? 'med' : 'high'}"></span>${EFFORT_LABELS[t.effort]}</div>
+          </div>
+          ${renderEquipmentIcons(t.equipment)}
+        </div>`;
+      }).join('');
+    }
+
+    function toggleWeekly(id) {
+      if (!state.weeklyLog) state.weeklyLog = {};
+      const weekKey = getWeekKey();
+      if (!state.weeklyLog[weekKey]) state.weeklyLog[weekKey] = {};
+      const wasCompleted = state.weeklyLog[weekKey][id];
+      state.weeklyLog[weekKey][id] = !state.weeklyLog[weekKey][id];
+      recordActivity(); saveState(); renderWeeklyTasks(); updateProgress();
+      
+      if (!wasCompleted) {
+        showConfetti();
+      }
     }
 
     function renderZoneTasks() {
@@ -2305,6 +2511,16 @@
       state.timerInterval = setInterval(() => {
         state.timerSeconds--;
         updateTimerDisplay();
+        
+        // Track cleaning minutes (every 60 seconds = 1 minute)
+        const today = getTodayKey();
+        if (!state.cleaningMinutes) state.cleaningMinutes = {};
+        if (!state.cleaningMinutes[today]) state.cleaningMinutes[today] = 0;
+        if (state.timerSeconds % 60 === 0 && state.timerSeconds > 0) {
+          state.cleaningMinutes[today]++;
+          saveState();
+        }
+        
         // Check for chime
         if (state.chimeEnabled && state.timerSeconds > 0) {
           const elapsed = (state.timerMinutes * 60) - state.timerSeconds;
@@ -2348,6 +2564,9 @@
     function openTaskFocus(type, index) {
       const log = state.dailyLog[getTodayKey()] || { daily: {} };
       if (!state.zoneLog) state.zoneLog = {};
+      if (!state.weeklyLog) state.weeklyLog = {};
+      const weekKey = getWeekKey();
+      const weeklyLog = state.weeklyLog[weekKey] || {};
       const z = state.zones[state.currentZoneIndex];
       state.focusTasks = [];
       
@@ -2359,6 +2578,13 @@
         const comp = log.daily && log.daily[t.id];
         if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
           allTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [], originalIndex: idx });
+        }
+      });
+
+      state.weeklyTasks.forEach((t, idx) => {
+        const comp = weeklyLog[t.id];
+        if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
+          allTasks.push({ type: 'weekly', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [], originalIndex: idx });
         }
       });
       
@@ -2374,6 +2600,8 @@
       let tappedTaskIndex = allTasks.findIndex(t => {
         if (type === 'daily') {
           return t.type === 'daily' && t.originalIndex === index;
+        } else if (type === 'weekly') {
+          return t.type === 'weekly' && t.originalIndex === index;
         } else {
           return t.type === 'zone' && t.originalIndex === index;
         }
@@ -2403,6 +2631,9 @@
     function enterFocusMode() {
       const log = state.dailyLog[getTodayKey()] || { daily: {} };
       if (!state.zoneLog) state.zoneLog = {};
+      if (!state.weeklyLog) state.weeklyLog = {};
+      const weekKey = getWeekKey();
+      const weeklyLog = state.weeklyLog[weekKey] || {};
       const z = state.zones[state.currentZoneIndex];
       state.focusTasks = [];
       
@@ -2411,6 +2642,12 @@
         const comp = log.daily && log.daily[t.id];
         if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
           state.focusTasks.push({ type: 'daily', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
+        }
+      });
+      state.weeklyTasks.forEach(t => {
+        const comp = weeklyLog[t.id];
+        if (!comp && shouldShowTask(t.effort, false, t.equipment)) {
+          state.focusTasks.push({ type: 'weekly', id: t.id, text: t.text, effort: t.effort, equipment: t.equipment || [] });
         }
       });
       z.tasks.forEach((t, i) => {
@@ -2466,6 +2703,7 @@
       if (state.focusIndex >= state.focusTasks.length) return;
       const t = state.focusTasks[state.focusIndex];
       if (t.type === 'daily') toggleDaily(t.id);
+      else if (t.type === 'weekly') toggleWeekly(t.id);
       else toggleZone(t.id);
       // Move to next task
       state.focusIndex++;
@@ -2586,12 +2824,39 @@
 
     function renderZoneListSettings() {
       document.getElementById('zoneListSettings').innerHTML = state.zones.map((z, i) =>
-        `<div class="zone-item ${i === state.currentZoneIndex ? 'current' : ''}" onclick="jumpToZone(${i})">
+        `<div class="zone-item ${i === state.currentZoneIndex ? 'current' : ''}" onclick="confirmJumpToZone(${i})">
           <div class="zone-number">${i + 1}</div>
           <div class="zone-item-name">${z.name}</div>
           ${i === state.currentZoneIndex ? '<span class="zone-item-badge">Current</span>' : ''}
         </div>`
       ).join('');
+    }
+
+    let pendingZoneJump = null;
+
+    function confirmJumpToZone(i) {
+      if (i === state.currentZoneIndex) return; // Already on this zone
+      pendingZoneJump = i;
+      document.getElementById('jumpZoneName').textContent = state.zones[i].name;
+      document.getElementById('jumpZoneConfirmModal').classList.add('active');
+    }
+
+    function cancelJumpToZone() {
+      pendingZoneJump = null;
+      closeModal('jumpZoneConfirmModal');
+    }
+
+    function executeJumpToZone() {
+      if (pendingZoneJump !== null) {
+        state.currentZoneIndex = pendingZoneJump;
+        state.zoneLog = {}; // Clear zone task completions when switching
+        saveState();
+        closeModal('jumpZoneConfirmModal');
+        closeModal('settingsModal');
+        renderAll();
+        showToast(`Switched to ${state.zones[pendingZoneJump].name}`);
+        pendingZoneJump = null;
+      }
     }
 
     function jumpToZone(i) {
@@ -2662,19 +2927,26 @@
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${state.calendarYear}-${String(state.calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const hasAct = state.dailyLog[dateStr] && (Object.values(state.dailyLog[dateStr].daily || {}).some(Boolean) || Object.values(state.dailyLog[dateStr].zone || {}).some(Boolean));
+        const mins = (state.cleaningMinutes && state.cleaningMinutes[dateStr]) || 0;
         const isToday = dateStr === today;
         const isSel = dateStr === state.selectedDate;
-        html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasAct ? 'has-activity' : ''} ${isSel ? 'selected' : ''}" onclick="selectDate('${dateStr}')">${d}</div>`;
+        html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasAct ? 'has-activity' : ''} ${isSel ? 'selected' : ''}" onclick="selectDate('${dateStr}')">
+          <span class="calendar-day-num">${d}</span>
+          ${mins > 0 ? `<span class="calendar-day-mins">${mins}m</span>` : ''}
+        </div>`;
       }
       html += `</div>`;
       if (state.selectedDate) {
         const log = state.dailyLog[state.selectedDate] || { daily: {}, zone: {} };
+        const mins = (state.cleaningMinutes && state.cleaningMinutes[state.selectedDate]) || 0;
         const tasks = [];
         state.dailyTasks.forEach(t => { if (log.daily && log.daily[t.id]) tasks.push(t.text); });
         state.zones.forEach((z, zi) => {
           z.tasks.forEach((t, ti) => { if (log.zone && log.zone[`z${zi}_${ti}`]) tasks.push(`${z.name}: ${t.text}`); });
         });
-        html += `<div class="day-detail"><div class="day-detail-title">${state.selectedDate}</div>`;
+        html += `<div class="day-detail">
+          <div class="day-detail-title">${state.selectedDate}</div>
+          ${mins > 0 ? `<div class="day-detail-mins">⏱️ ${mins} minute${mins !== 1 ? 's' : ''} of cleaning</div>` : ''}`;
         html += tasks.length ? tasks.map(t => `<div class="review-task"><svg class="review-task-icon done" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${t}</div>`).join('') : '<div class="day-detail-empty">No tasks completed</div>';
         html += '</div>';
       }
@@ -2721,6 +2993,8 @@
       let task;
       if (type === 'daily') {
         task = state.dailyTasks[taskIndex];
+      } else if (type === 'weekly') {
+        task = state.weeklyTasks[taskIndex];
       } else {
         const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
         task = state.zones[idx].tasks[taskIndex];
@@ -2805,8 +3079,14 @@
           state.dailyTasks.splice(targetIndex, 0, removed);
           saveState();
           renderDailyEditorList();
+        } else if (type === 'weekly') {
+          const [removed] = state.weeklyTasks.splice(draggedTaskIndex, 1);
+          state.weeklyTasks.splice(targetIndex, 0, removed);
+          saveState();
+          renderWeeklyEditorList();
         } else if (type === 'zone') {
-          const z = state.zones[state.currentZoneIndex];
+          const idx = editingZoneIndex !== null ? editingZoneIndex : state.currentZoneIndex;
+          const z = state.zones[idx];
           const [removed] = z.tasks.splice(draggedTaskIndex, 1);
           z.tasks.splice(targetIndex, 0, removed);
           saveState();
@@ -2853,6 +3133,65 @@
       closeModal('dailyEditorModal'); 
       renderDailyTasks();
       showToast('Daily tasks updated!');
+    }
+
+    // Weekly Tasks Editor
+    function openWeeklyEditor() {
+      renderWeeklyEditorList();
+      document.getElementById('weeklyEditorModal').classList.add('active');
+    }
+
+    function renderWeeklyEditorList() {
+      document.getElementById('weeklyEditorList').innerHTML = state.weeklyTasks.map((t, i) => `
+        <div class="edit-task-item" style="flex-direction: column; align-items: stretch;" draggable="true" data-index="${i}" ondragstart="dragTaskStart(event, 'weekly')" ondragover="dragTaskOver(event)" ondrop="dropTask(event, 'weekly')" ondragend="dragTaskEnd(event)">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="edit-task-drag">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+            </div>
+            <input type="text" class="edit-task-input" value="${t.text}" data-index="${i}" onchange="updateWeeklyTaskText(${i}, this.value)" onblur="updateWeeklyTaskText(${i}, this.value)">
+            <select class="effort-select" data-index="${i}" onchange="updateWeeklyTaskEffort(${i}, this.value)">
+              <option value="1" ${t.effort === 1 ? 'selected' : ''}>Low</option>
+              <option value="2" ${t.effort === 2 ? 'selected' : ''}>Medium</option>
+              <option value="3" ${t.effort === 3 ? 'selected' : ''}>High</option>
+            </select>
+            <button class="delete-task-btn" onclick="deleteWeeklyTask(${i})"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          ${renderEquipmentSelector(t.equipment, i, 'weekly')}
+        </div>
+      `).join('');
+    }
+
+    function updateWeeklyTaskText(index, value) {
+      state.weeklyTasks[index].text = value;
+      saveState();
+    }
+
+    function updateWeeklyTaskEffort(index, value) {
+      state.weeklyTasks[index].effort = parseInt(value);
+      saveState();
+    }
+
+    function addWeeklyTask() {
+      state.weeklyTasks.push({ id: 'w' + Date.now(), text: '', effort: 1, equipment: [] });
+      saveState();
+      renderWeeklyEditorList();
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('#weeklyEditorList .edit-task-input');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }, 50);
+    }
+
+    function deleteWeeklyTask(i) {
+      state.weeklyTasks.splice(i, 1);
+      saveState();
+      renderWeeklyEditorList();
+    }
+
+    function saveWeeklyEdits() {
+      saveState();
+      closeModal('weeklyEditorModal');
+      renderWeeklyTasks();
+      showToast('Weekly tasks updated!');
     }
 
     function openZoneEditor() {
