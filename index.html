@@ -2748,7 +2748,15 @@
       const log = state.dailyLog[getTodayKey()] || { daily: {}, zone: {} };
       const z = state.zones[state.currentZoneIndex];
       const dc = Object.values(log.daily || {}).filter(Boolean).length;
-      const zc = Object.values(log.zone || {}).filter(Boolean).length;
+      
+      // Count completed zone tasks for the current zone
+      if (!state.zoneLog) state.zoneLog = {};
+      let zc = 0;
+      z.tasks.forEach((task, idx) => {
+        const taskId = `z${state.currentZoneIndex}_${idx}`;
+        if (state.zoneLog[taskId]) zc++;
+      });
+      
       const total = state.dailyTasks.length + z.tasks.length;
       const pct = total > 0 ? Math.round(((dc + zc) / total) * 100) : 0;
       document.getElementById('zoneProgress').style.width = `${pct}%`;
